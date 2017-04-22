@@ -2,6 +2,7 @@ import java.net.*;
 import java.io.*;
 
 public class MafiaSThread extends Thread {
+    private Socket socket = null;
     public MafiaSThread(Socket socket) {
         super("MafiaSThread");
         this.socket = socket;
@@ -17,11 +18,11 @@ public class MafiaSThread extends Thread {
         ) {
             String inputLine, outputLine;
             MafiaGame mg = new MafiaGame();//client class ??
-            outputLine = mg.processInput(null);
+            outputLine = mg.processGame(null);
             out.println(outputLine);
 
             while ((inputLine = in.readLine()) != null) {
-                outputLine = mg.processInput(inputLine);
+                outputLine = mg.processGame(inputLine);
                 out.println(outputLine);
                 if (outputLine.equals("Game over"))
                     break;

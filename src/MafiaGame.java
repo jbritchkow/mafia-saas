@@ -5,6 +5,7 @@ public class MafiaGame {
     private static final int GAMESTART = 0;
     private static final int ASKEDNAME = 1;
     private static final int GOTNAME = 2;
+    private int state =GAMESTART;
 
     public String processGame(String userInput){
         String gameOutput = null;
@@ -19,8 +20,9 @@ public class MafiaGame {
                 state = GOTNAME;
             }
             else{
-                state==GAMESTART;
+                state=GAMESTART;
             }
         }
+        return gameOutput;
     }
 }
