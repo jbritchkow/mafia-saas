@@ -17,7 +17,7 @@ public class MafiaSThread extends Thread {
                                 socket.getInputStream()));
         ) {
             String inputLine, outputLine;
-            MafiaGame mg = new MafiaGame();//client class ??
+            MafiaGame mg = new MafiaGame();//service class
             outputLine = mg.processGame(null);
             out.println(outputLine);
 
