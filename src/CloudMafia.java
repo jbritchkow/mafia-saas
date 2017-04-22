@@ -2,7 +2,7 @@ import java.io.IOException;
 import java.net.*;
 
 public class CloudMafia {
-
+public static int code;
 
     public static void main(String args[]){
         /*
@@ -10,7 +10,7 @@ public class CloudMafia {
         randomizing it too much? In any case, used an int because ints
         are easy to compare and easy to randomize.
         */
-        int code =15323;
+        code =15323;
         System.out.println(code+"");
         boolean listening=true;
 
