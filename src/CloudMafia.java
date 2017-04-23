@@ -14,7 +14,7 @@ public static int code;
         System.out.println(code+"");
         boolean listening=true;
 
-        int portNumber = 4444;//Random port, can customize later Integer.parseInt(args[0]);
+        int portNumber = 4444;//Random port, can customize later, probably want localhost for testing. Integer.parseInt(args[0]);
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
             while (listening) {
                 new MafiaSThread(serverSocket.accept()).start();
@@ -23,12 +23,6 @@ public static int code;
             System.err.println("Could not listen on port " + portNumber);
             System.exit(-1);
         }
-        //main as controller class?
-        //sockets
-        //if code, launch thread
-        //receive names
-        //once all threads are launched and names are received, assign roles
-
     }
 
 }
