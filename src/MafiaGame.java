@@ -4,33 +4,45 @@ import java.io.*;
 public class MafiaGame {
     private static final int GAMESTART = 0;
     private static final int ASKEDCODE = 1;
-    private static final int ASKEDNAME = 2;
-    private static final int GOTNAME = 3;
-    private static final int STEPONE=4;
+    private static final int GOTCODE = 2;
+    private static final int ASKEDNAME = 3;
+    private static final int GOTNAME = 4;
+    private static final int STEPONE=5;
 
     private int state =GAMESTART;
 
     //private int code =0;
     public String processGame(String userInput){
         String gameOutput = null;
+        //if(userInput!=null||userInput.equals("Game over")|| userInput.equals("exit"))gameOutput="Game over";
         if(state==GAMESTART){
-            gameOutput="Welcome to SaaS Mafia! Please enter your name.";
+            gameOutput="Welcome to SaaS Mafia! Please enter your game code.";
+            state=ASKEDCODE;
         }
         else if (state == ASKEDCODE){
-            if(Integer.parseInt(userInput)==CloudMafia.code){
+            int loccode = Integer.parseInt(userInput);//error forced me to do this
+            if(loccode==CloudMafia.code){
                 //TODO: SANITIZE INPUT
                 gameOutput="You have entered game " +CloudMafia.code + "!";
+                state = GOTCODE;
             }
             else{
                 gameOutput="That is not a valid game.";
                 state = GAMESTART;
             }
         }
+        else if (state == GOTCODE){
+            gameOutput="Please enter your name!";
+                state=ASKEDNAME;
+
+        }
         else if (state ==ASKEDNAME){
             if(userInput!=""){
+                gameOutput = "Hello, " + userInput + "!";
                 //TODO: ADD NAME TO ARRAY/DATABASE
                 //TODO: ASSIGN ROLE
                 //TODO: SANITIZE INPUT
+                // TODO: Wait for all to join
                 state = GOTNAME;
             }
             else{
