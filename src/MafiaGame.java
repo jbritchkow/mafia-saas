@@ -39,10 +39,20 @@ public class MafiaGame {
         else if (state ==ASKEDNAME){
             if(userInput!=""){
                 gameOutput = "Hello, " + userInput + "!";
+                while(!CloudMafia.mutex.tryAcquire()){
+                    try {
+                        this.wait(2);
+                    }
+                    catch(InterruptedException interrupt){
+                        gameOutput=("Sorry, interrupt");
+                    }
+                }
                 //TODO: ADD NAME TO ARRAY/DATABASE
-                //TODO: ASSIGN ROLE
+                //TODO: ADD USER ID
+                // TODO: ASSIGN ROLE
+                CloudMafia.mutex.release();
                 //TODO: SANITIZE INPUT
-                // TODO: Wait for all to join
+                // TODO: Wait for all to join>semaphore with size = # joiners? Possible?
                 state = GOTNAME;
             }
             else{
