@@ -5,6 +5,23 @@ import java.util.concurrent.Semaphore;
 public class CloudMafia {
 public static int code;
 public static Semaphore mutex;
+public static int userid;
+private static final Object lock = new Object();
+static boolean timeCheck(long checkTime){
+    synchronized(lock){
+        try {
+            if(checkTime>30000) {
+                lock.wait(5000);
+                lock.notifyAll();
+                return false;
+            }
+        }
+        catch(InterruptedException e){
+            System.out.println("interrupted main thread");
+        }
+    }
+    return true;
+}
     public static void main(String args[]){
         /*
         hardcoded the code for now. I don't think we should need to worry about
@@ -13,13 +30,19 @@ public static Semaphore mutex;
         */
         code =15323;
         mutex= new Semaphore(1,true);
+        userid=1;
         System.out.println(code+"");
         boolean listening=true;
-
+        long startTime = System.currentTimeMillis();
+        // Run some code;
+        long stopTime = System.currentTimeMillis();
+        //long checkTime;
         int portNumber = 444;//Random port, can customize later, probably want localhost for testing. Integer.parseInt(args[0]);
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
             while (listening) {
                 new MafiaSThread(serverSocket.accept()).start();
+                stopTime=System.currentTimeMillis();
+                listening=timeCheck(startTime=stopTime);
 
             }
         } catch (IOException e) {

@@ -38,20 +38,30 @@ public class MafiaGame {
         }
         else if (state ==ASKEDNAME){
             if(userInput!=""){
+                //TODO: SANITIZE INPUT
                 gameOutput = "Hello, " + userInput + "!";
-                while(!CloudMafia.mutex.tryAcquire()){
+                while(!CloudMafia.mutex.tryAcquire()){ //readwritelock?
                     try {
-                        this.wait(2);
+                        this.wait(2000);//miliseconds
                     }
                     catch(InterruptedException interrupt){
                         gameOutput=("Sorry, interrupt");
                     }
                 }
-                //TODO: ADD NAME TO ARRAY/DATABASE
-                //TODO: ADD USER ID
+                //acquired mutex
+
+                CloudMafia.userid++;
                 // TODO: ASSIGN ROLE
+                //TODO: ADD NAME, USERID, ROLE TO ARRAY/DATABASE
+
                 CloudMafia.mutex.release();
-                //TODO: SANITIZE INPUT
+                //released mutex. Now another thread can access database.
+                try {
+                    this.wait();//waits until notifyAll, can be used to wait for all to reach same place
+                }
+                catch(InterruptedException interrupt){
+                    gameOutput=("Sorry, interrupt");
+                }
                 // TODO: Wait for all to join>semaphore with size = # joiners? Possible?
                 state = GOTNAME;
             }
