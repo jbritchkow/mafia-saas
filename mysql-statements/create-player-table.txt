@@ -1,0 +1,8 @@
+CREATE TABLE `players` (
+  `Id` int(11) NOT NULL,
+  `Name` varchar(45) NOT NULL,
+  `GameId` int(11) NOT NULL,
+  `Role` varchar(45) DEFAULT NULL,
+  `State` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`Id`,`GameId`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

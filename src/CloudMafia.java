@@ -6,6 +6,7 @@ public class CloudMafia {
 public static int code;
 public static Semaphore mutex;
 public static int userid;
+public static DatabaseHelper dbHelper;
 //public static int threadCount;
 private static final Object lock = new Object();//not a real lock
 
@@ -25,6 +26,10 @@ static boolean timeCheck(long checkTime){
     return true;
 }
     public static void main(String args[]){
+        try {
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+        } catch(Exception e) { return; }
+        dbHelper = new DatabaseHelper("jdbc:mysql://localhost/mafia?user=root&password=password");
         /*
         hardcoded the code for now. I don't think we should need to worry about
         randomizing it too much? In any case, used an int because ints
