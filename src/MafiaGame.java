@@ -42,7 +42,7 @@ public class MafiaGame {
                 gameOutput = "Hello, " + userInput + "!";
                 while(!CloudMafia.mutex.tryAcquire()){ //readwritelock?
                     try {
-                        this.wait(2000);//miliseconds
+                        this.wait(2000);//milliseconds
                     }
                     catch(InterruptedException interrupt){
                         gameOutput=("Sorry, interrupt");
@@ -53,8 +53,8 @@ public class MafiaGame {
                 CloudMafia.userid++;
                 // TODO: ASSIGN ROLE
                 //TODO: ADD NAME, USERID, ROLE TO ARRAY/DATABASE
-
                 CloudMafia.mutex.release();
+
                 //released mutex. Now another thread can access database.
                 try {
                     this.wait();//waits until notifyAll, can be used to wait for all to reach same place
@@ -62,7 +62,9 @@ public class MafiaGame {
                 catch(InterruptedException interrupt){
                     gameOutput=("Sorry, interrupt");
                 }
-                // TODO: Wait for all to join>semaphore with size = # joiners? Possible?
+                //CloudMafia.threadCount++;
+
+                // Wait on main thread. Maybe not best idea.
                 state = GOTNAME;
             }
             else{
@@ -70,13 +72,35 @@ public class MafiaGame {
             }
         }
         else if (state ==GOTNAME){
+            gameOutput = "Hello, " + userInput + "!";
+            while(!CloudMafia.mutex.tryAcquire()){ //readwritelock?
+                try {
+                    this.wait(2000);//milliseconds
+                }
+                catch(InterruptedException interrupt){
+                    gameOutput=("Sorry, interrupt");
+                }
+            }
             //TODO: Mafia kill, police guess, doctor heals
+            //TODO: Write this to database
+            CloudMafia.mutex.release();
             //TODO: Civilians chill
             //TODO: Wait until stage is over, then unlock and move to next stage
             state =STEPONE;
         }
         else if (state ==STEPONE){
+            while(!CloudMafia.mutex.tryAcquire()){ //readwritelock?
+                try {
+                    this.wait(2000);//milliseconds
+                }
+                catch(InterruptedException interrupt){
+                    gameOutput=("Sorry, interrupt");
+                }
+            }
             //TODO: voting
+            //TODO: Write to database
+            CloudMafia.mutex.release();
+
             //TODO: Display results; show if sucessful or not
             //TODO: If all mafia dead, gameOutput=Game Over
             //TODO: else, set state back to gotname and restart

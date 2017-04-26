@@ -6,7 +6,9 @@ public class CloudMafia {
 public static int code;
 public static Semaphore mutex;
 public static int userid;
-private static final Object lock = new Object();
+//public static int threadCount;
+private static final Object lock = new Object();//not a real lock
+
 static boolean timeCheck(long checkTime){
     synchronized(lock){
         try {
@@ -30,7 +32,7 @@ static boolean timeCheck(long checkTime){
         */
         code =15323;
         mutex= new Semaphore(1,true);
-        userid=1;
+        userid=0;
         System.out.println(code+"");
         boolean listening=true;
         long startTime = System.currentTimeMillis();
