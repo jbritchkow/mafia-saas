@@ -84,6 +84,8 @@ public class MafiaGame {
                 state=GOTCODE;
             }
         }
+
+
         else if (state ==GOTNAME){
            // Object obj=new Object();
            // try {

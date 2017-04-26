@@ -49,7 +49,7 @@ static boolean timeCheck(long checkTime){
             while (listening) {
                 new MafiaSThread(serverSocket.accept()).start();
                 stopTime=System.currentTimeMillis();
-                listening=timeCheck(startTime=stopTime);
+                listening=timeCheck(stopTime-startTime);
 
             }
             //Could check per thread, if state equals, then wait...?
