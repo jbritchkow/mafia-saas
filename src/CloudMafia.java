@@ -47,6 +47,7 @@ static boolean timeCheck(long checkTime){
                 listening=timeCheck(startTime=stopTime);
 
             }
+            //Could check per thread, if state equals, then wait...?
         } catch (IOException e) {
             System.err.println("Could not listen on port " + portNumber);
             System.exit(-1);
