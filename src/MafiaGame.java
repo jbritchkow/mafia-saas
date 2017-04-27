@@ -12,11 +12,14 @@ public class MafiaGame {
     private static final int STEPONE=5;
     public static final int VOTED =6;
     public static final int ROUNDN=7;
+    public static final int WAITING=8;
+    public static final int DONEWAIT=9;
 
     private int state =GAMESTART;
 
     //private int code =0;
     public String processGame(String userInput){
+        String userName="";
         String gameOutput = "";
         String role="Civilian";
         //if(userInput!=null||userInput.equals("Game over")|| userInput.equals("exit"))gameOutput="Game over";
@@ -42,10 +45,40 @@ public class MafiaGame {
                 state=ASKEDNAME;
 
         }
-        else if (state ==ASKEDNAME){
-            if(userInput!=""){
+        else if (state ==ASKEDNAME) {
+            if (userInput != "") {
                 //TODO: SANITIZE INPUT
-                gameOutput = "Hello, " + userInput + "!";
+                gameOutput = "Hello, " + userInput + "! Press enter to wait while the game loads.";
+                userName=userInput;
+                while(!CloudMafia.mutex.tryAcquire()){ //readwritelock?
+                    try {
+                        this.wait(2000);//milliseconds
+                    }
+                    catch(InterruptedException interrupt){
+                        gameOutput=("Sorry, interrupt");
+                    }
+                }
+                //acquired mutex
+                CloudMafia.threadcount++;
+                CloudMafia.mutex.release();
+                state=WAITING;
+            }
+            else{
+                state=GOTCODE;
+            }
+        }
+        else if(state==WAITING) {
+            while (!CloudMafia.timeCheck()) { //checks to see if time has passed. spins.
+            }
+            state=DONEWAIT;
+        }
+        else if (state==DONEWAIT){
+            try {
+                CloudMafia.multithread.acquire();
+            }
+            catch(InterruptedException e){
+                gameOutput="stupid semaphores";
+            }
 
                 while(!CloudMafia.mutex.tryAcquire()){ //readwritelock?
                 try {
@@ -79,9 +112,9 @@ public class MafiaGame {
                 gameOutput+=" What is your quest?";
                 }
                 state = GOTNAME;
-            }
-            else{
-                state=GOTCODE;
+            //}
+            if(CloudMafia.multithread.availablePermits()==0){
+                CloudMafia.multithread.release(CloudMafia.threadcount);
             }
         }
 

@@ -5,17 +5,20 @@ import java.util.concurrent.Semaphore;
 public class CloudMafia {
 public static int code;
 public static Semaphore mutex;
+public static Semaphore multithread;
 public static int userid;
 public static DatabaseHelper dbHelper;
+public static int threadcount;
 //public static int threadCount;
 private static final Object lock = new Object();//not a real lock
+private static long checkTime;
 
-static boolean timeCheck(long checkTime){
+public static boolean timeCheck(){
     synchronized(lock){
         try {
             if(checkTime>30000) {
                 lock.wait(5000);
-                lock.notifyAll();
+                lock.notify();
                 return false;
             }
         }
@@ -42,16 +45,18 @@ static boolean timeCheck(long checkTime){
         boolean listening=true;
         long startTime = System.currentTimeMillis();
         // Run some code;
-        long stopTime = System.currentTimeMillis();
+        long stopTime =0;
         //long checkTime;
         int portNumber = 444;//Random port, can customize later, probably want localhost for testing. Integer.parseInt(args[0]);
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
             while (listening) {
                 new MafiaSThread(serverSocket.accept()).start();
                 stopTime=System.currentTimeMillis();
-                listening=timeCheck(stopTime-startTime);
+                checkTime=stopTime-startTime;
+                listening=timeCheck();
 
             }
+            multithread=new Semaphore(threadcount,true);
             //Could check per thread, if state equals, then wait...?
         } catch (IOException e) {
             System.err.println("Could not listen on port " + portNumber);
