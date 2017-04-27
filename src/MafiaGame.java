@@ -48,7 +48,7 @@ public class MafiaGame {
         else if (state ==ASKEDNAME) {
             if (userInput != "") {
                 //TODO: SANITIZE INPUT
-                gameOutput = "Hello, " + userInput + "! Press enter to wait while the game loads.";
+                gameOutput = "Hello, " + userInput + "! Press enter to wait while the game loads.\n";
                 userName=userInput;
                 while(!CloudMafia.mutex.tryAcquire()){ //readwritelock?
                     try {
@@ -61,6 +61,7 @@ public class MafiaGame {
                 //acquired mutex
                 CloudMafia.threadcount++;
                 CloudMafia.mutex.release();
+                System.out.println(CloudMafia.threadcount+"");
                 state=WAITING;
             }
             else{
@@ -68,11 +69,16 @@ public class MafiaGame {
             }
         }
         else if(state==WAITING) {
-            while (!CloudMafia.timeCheck()) { //checks to see if time has passed. spins.
+            System.out.println("in waiting");
+            if (CloudMafia.timeCheckgame()) {
+                //checks to see if time has passed. spins.
+                gameOutput="Waiting...\n";
+                state=WAITING;
             }
             state=DONEWAIT;
         }
         else if (state==DONEWAIT){
+            System.out.println("in donewait");
             try {
                 CloudMafia.multithread.acquire();
             }

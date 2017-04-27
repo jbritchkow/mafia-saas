@@ -14,6 +14,7 @@ private static final Object lock = new Object();//not a real lock
 private static long checkTime;
 
 public static boolean timeCheck(){
+    System.out.print(checkTime);
     synchronized(lock){
         try {
             if(checkTime>30000) {
@@ -25,6 +26,19 @@ public static boolean timeCheck(){
         catch(InterruptedException e){
             System.out.println("interrupted main thread");
         }
+    }
+    return true;
+}
+public static boolean timeCheckgame(){
+    /*try {
+        lock.wait(5000);
+    }
+    catch(InterruptedException e){
+        System.out.println("interrupted timeCheckgame");
+    }
+    */
+    if(multithread!=null){
+        return timeCheck();
     }
     return true;
 }
@@ -54,6 +68,7 @@ public static boolean timeCheck(){
                 stopTime=System.currentTimeMillis();
                 checkTime=stopTime-startTime;
                 listening=timeCheck();
+                System.out.println(listening);
 
             }
             multithread=new Semaphore(threadcount,true);
