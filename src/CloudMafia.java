@@ -47,16 +47,18 @@ public static boolean timeCheckgame(){
     return true;
 }
     public static void main(String args[]){
+    code =15323;
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
         } catch(Exception e) { return; }
         dbHelper = new DatabaseHelper("jdbc:mysql://mafia.curimo31kkeg.us-west-2.rds.amazonaws.com:3306/mafia?user=aslee1&password=secretpassword987");
+        dbHelper.deleteGame(code);
         /*
         hardcoded the code for now. I don't think we should need to worry about
         randomizing it too much? In any case, used an int because ints
         are easy to compare and easy to randomize.
         */
-        code =15323;
+
         here=here2=0;
 
         mutex= new Semaphore(1,true);

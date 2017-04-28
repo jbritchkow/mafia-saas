@@ -172,5 +172,28 @@ public class DatabaseHelper {
         }
         return players;
     }
+    public boolean deleteGame(int gameId) {
+        Statement stmt = null;
+        boolean success = true;
+        try {
+            connect();
+            stmt = conn.createStatement();
+            stmt.executeQuery("delete * from Players where GameId='" + gameId + "'");
+        }
+        catch (SQLException ex) {
+            success = false;
+            System.out.println("SQLException: " + ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+        }
+        finally {
+            if (stmt != null)
+                try {
+                    stmt.close();
+                } catch (SQLException e) {}
+            disconnect();
+        }
+        return success;
+    }
 
 }

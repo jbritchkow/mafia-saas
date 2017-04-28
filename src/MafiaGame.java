@@ -336,19 +336,9 @@ public class MafiaGame {
                         }
 
                 }
-
-
                 //TODO: sum votes across threads
                 //arraylist.add for votes? 2d array with 0s if no votes?
                 //TODO: Write results to database
-
-
-
-                //TODO: Display results; show if sucessful or not
-                //TODO: If all mafia dead, gameOutput=Game Over
-                //TODO: else, set state back to gotname and restart
-                //TODO: if this thread is dead, ouput=game over
-
 
             }
 
@@ -376,9 +366,13 @@ public class MafiaGame {
                         max = CloudMafia.votes[i];
                         mafia = i;
                     }
-                    System.out.println(CloudMafia.votes[i]);
+                    //System.out.println(CloudMafia.votes[i]);
                 }
             //}
+            // TODO: Display results; show if sucessful or not
+            //TODO: If all mafia dead, gameOutput=Game Over
+            //TODO: else, set state back to gotname and restart
+            //TODO: if this thread is dead, ouput=game over
             //TODO: Check if 'mafia' is mafia
             //TODO: set 'mafia' to dead status
             gameOutput="You voted that " +map.get(mafia)+" was in the mafia!";
