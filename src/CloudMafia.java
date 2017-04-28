@@ -9,16 +9,23 @@ public static Semaphore multithread;
 public static int userid;
 public static DatabaseHelper dbHelper;
 public static int threadcount;
+public static int here;
+public static int here2;
 //public static int threadCount;
 private static final Object lock = new Object();//not a real lock
 private static long checkTime;
+//private static long startTime;
+//private static long finishTime;
 
 public static boolean timeCheck(){
-    System.out.print(checkTime);
+
     synchronized(lock){
         try {
+            //finishTime=System.currentTimeMillis();
+            //long checkTime=finishTime-startTime;
+            System.out.println(checkTime);
             if(checkTime>30000) {
-                lock.wait(5000);
+                lock.wait(1000);
                 lock.notify();
                 return false;
             }
@@ -30,13 +37,7 @@ public static boolean timeCheck(){
     return true;
 }
 public static boolean timeCheckgame(){
-    /*try {
-        lock.wait(5000);
-    }
-    catch(InterruptedException e){
-        System.out.println("interrupted timeCheckgame");
-    }
-    */
+    System.out.println("timecheck =" +timeCheck());
     if(multithread!=null){
         return timeCheck();
     }
@@ -53,25 +54,29 @@ public static boolean timeCheckgame(){
         are easy to compare and easy to randomize.
         */
         code =15323;
+        here=0;
         mutex= new Semaphore(1,true);
+        mutex.release(1);
         userid=0;
         System.out.println(code+"");
         boolean listening=true;
         long startTime = System.currentTimeMillis();
         // Run some code;
-        long stopTime =0;
+        long finishTime =0;
         //long checkTime;
         int portNumber = 444;//Random port, can customize later, probably want localhost for testing. Integer.parseInt(args[0]);
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
             while (listening) {
                 new MafiaSThread(serverSocket.accept()).start();
-                stopTime=System.currentTimeMillis();
-                checkTime=stopTime-startTime;
+                finishTime=System.currentTimeMillis();
+                checkTime=finishTime-startTime;
                 listening=timeCheck();
                 System.out.println(listening);
 
             }
             multithread=new Semaphore(threadcount,true);
+            multithread.release(threadcount);
+
             //Could check per thread, if state equals, then wait...?
         } catch (IOException e) {
             System.err.println("Could not listen on port " + portNumber);
