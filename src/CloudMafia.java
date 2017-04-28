@@ -1,5 +1,7 @@
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.Semaphore;
 
 public class CloudMafia {
@@ -11,8 +13,7 @@ public static DatabaseHelper dbHelper;
 public static int threadcount;
 public static int here;
 public static int here2;
-public static int here3;
-public static int here4;
+public static int [] votes;
 //public static int threadCount;
 private static final Object lock = new Object();//not a real lock
 private static long checkTime;
@@ -49,24 +50,25 @@ public static boolean timeCheckgame(){
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
         } catch(Exception e) { return; }
-        dbHelper = new DatabaseHelper("jdbc:mysql:mafia.curimo31kkeg.us-west-2.rds.amazonaws.com?user=aslee1&password=secretpassword987");
+        dbHelper = new DatabaseHelper("jdbc:mysql://mafia.curimo31kkeg.us-west-2.rds.amazonaws.com:3306/mafia?user=aslee1&password=secretpassword987");
         /*
         hardcoded the code for now. I don't think we should need to worry about
         randomizing it too much? In any case, used an int because ints
         are easy to compare and easy to randomize.
         */
         code =15323;
-        here=here2=here3=here4=0;
+        here=here2=0;
+
         mutex= new Semaphore(1,true);
         //mutex.release();
-        userid=0;
+        userid=20;
         System.out.println(code+"");
         boolean listening=true;
         long startTime = System.currentTimeMillis();
         // Run some code;
         long finishTime =0;
         //long checkTime;
-        int portNumber = 444;//Random port, can customize later, probably want localhost for testing. Integer.parseInt(args[0]);
+        int portNumber = 444;//Random port, can customize later. prev: Integer.parseInt(args[0]);
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
             while (listening) {
                 new MafiaSThread(serverSocket.accept()).start();
@@ -75,6 +77,10 @@ public static boolean timeCheckgame(){
                 listening=timeCheck();
                 System.out.println(listening);
 
+            }
+            votes=new int [userid+threadcount+1];
+            for(int i=0;i<votes.length;i++){
+                votes[i]=0;
             }
             multithread=new Semaphore(threadcount,true);
             multithread.release(threadcount);
