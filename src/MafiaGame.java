@@ -112,18 +112,18 @@ public class MafiaGame {
 
             CloudMafia.userid++;
 
-            /*boolean database =databaseHelper.checkNameAndAddPlayerToGame(CloudMafia.code, CloudMafia.userid, userName);
+            boolean database =CloudMafia.dbHelper.checkNameAndAddPlayerToGame(CloudMafia.code, CloudMafia.userid, userName);
             int n=0;
             while(!database){
                 n++;
-                database =databaseHelper.checkNameAndAddPlayerToGame(CloudMafia.code, CloudMafia.userid, userName+""+n);
+                database =CloudMafia.dbHelper.checkNameAndAddPlayerToGame(CloudMafia.code, CloudMafia.userid, userName+""+n);
 
             }
             if(n>0){
                 gameOutput="Sorry, that name was taken. You are now "+userName+""+n+".\n";
                 userName=userName+""+n;
             }
-            */
+
             //TODO: ASSIGN ROLE
             //threadid as userid????? How else to attach thread/user?
             CloudMafia.here++;

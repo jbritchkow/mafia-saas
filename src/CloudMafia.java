@@ -49,7 +49,7 @@ public static boolean timeCheckgame(){
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
         } catch(Exception e) { return; }
-        dbHelper = new DatabaseHelper("jdbc:mysql://localhost/mafia?user=root&password=password");
+        dbHelper = new DatabaseHelper("jdbc:mysql:mafia.curimo31kkeg.us-west-2.rds.amazonaws.com?user=asl&password=secretpassword987");
         /*
         hardcoded the code for now. I don't think we should need to worry about
         randomizing it too much? In any case, used an int because ints
