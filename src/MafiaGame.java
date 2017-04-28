@@ -90,16 +90,18 @@ public class MafiaGame {
         else if (state==DONEWAIT){
             System.out.println("in donewait");
             //System.out.println(CloudMafia.multithread.availablePermits() +" permits start dunwait " + userName);
-            try {
+            /*try {
                 CloudMafia.multithread.acquire();
             }
             catch(InterruptedException e){
                 gameOutput="stupid semaphores";
             }
             System.out.println(CloudMafia.multithread.availablePermits()+" permits avail after first get "+userName+" here "+CloudMafia.here);
+            */
                 while(!CloudMafia.mutex.tryAcquire()){ //readwritelock?
                 try {
-                    this.wait(500);//milliseconds
+                    Thread.sleep(500);
+                    //this.wait(500);//milliseconds
                 }
                 catch(InterruptedException interrupt){
                     gameOutput=("Sorry, interrupt");
@@ -127,25 +129,32 @@ public class MafiaGame {
             CloudMafia.here++;
             CloudMafia.mutex.release();
             //System.out.println(userName+"released mutex"+CloudMafia.mutex.availablePermits());
-            System.out.println(CloudMafia.multithread.availablePermits()+" permits avail check1 "+userName + "here "+CloudMafia.here);
+            //System.out.println(CloudMafia.multithread.availablePermits()+" permits avail check1 "+userName + "here "+CloudMafia.here);
 
             while(CloudMafia.here!=CloudMafia.threadcount){
+                try {
+                    Thread.sleep(500);
+                    //this.wait(500);//milliseconds
+                }
+                catch(InterruptedException interrupt){
+                    gameOutput=("Sorry, interrupt");
+                }
             }
 
             //might be a race condition. May need mutex.
-            System.out.println(CloudMafia.multithread.availablePermits()+" permits availpostcheck1 "+userName+ "here"+CloudMafia.here);
+            //System.out.println(CloudMafia.multithread.availablePermits()+" permits availpostcheck1 "+userName+ "here"+CloudMafia.here);
             //if(CloudMafia.multithread.availablePermits()==0){
-                CloudMafia.multithread.release();
+                //CloudMafia.multithread.release();
             //}
             //System.out.println(CloudMafia.multithread.availablePermits()+" permits avail after release1 "+userName);
             gameOutput += "You are a " + role + ".\n";
             //First step of this method complete: All data in the database. Now for second step.
-            try {
+           /* try {
                 CloudMafia.multithread.acquire();
             }
             catch(InterruptedException e){
                 gameOutput="stupid semaphores";
-            }
+            }*/
             //System.out.println(CloudMafia.multithread.availablePermits()+" permits avail after get2 "+userName + "mutex: "+CloudMafia.mutex.availablePermits());
             while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
                 try {
@@ -180,25 +189,32 @@ public class MafiaGame {
                 }
 
             //}
-            System.out.println(CloudMafia.multithread.availablePermits()+" permits avail check2 "+userName + "here2 "+CloudMafia.here2);
+            //System.out.println(CloudMafia.multithread.availablePermits()+" permits avail check2 "+userName + "here2 "+CloudMafia.here2);
             while(CloudMafia.here2!=CloudMafia.threadcount){
+                try {
+                    Thread.sleep(500);
+                    //this.wait(500);//milliseconds
+                }
+                catch(InterruptedException interrupt){
+                    gameOutput=("Sorry, interrupt");
+                }
             }
             //might be a race condition. May need mutex.
             //if(CloudMafia.multithread.availablePermits()==0){
-                CloudMafia.multithread.release();
+                //CloudMafia.multithread.release();
             //}
-            System.out.println(CloudMafia.multithread.availablePermits()+" permits avail postrelease2 "+userName);
+            //System.out.println(CloudMafia.multithread.availablePermits()+" permits avail postrelease2 "+userName);
             state = GOTNAME;
         }
 
 
         else if (state ==GOTNAME){
-            try {
+            /*try {
                 CloudMafia.multithread.acquire();
             }
             catch(InterruptedException e){
                 gameOutput="stupid semaphores";
-            }
+            }*/
             while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
                 try {
                     this.wait(500);//milliseconds
@@ -226,28 +242,34 @@ public class MafiaGame {
             }
             CloudMafia.here--;
             CloudMafia.mutex.release();
-            System.out.println("fave color here: " +CloudMafia.here+" "+userName+" multithread: "+CloudMafia.multithread.availablePermits());
+            System.out.println("fave color here: " +CloudMafia.here+" "+userName);
            if(role.equals("Civilian")){
                 gameOutput="What is your favorite color?";
             }
             while(CloudMafia.here!=0){
-
+                try {
+                    Thread.sleep(500);
+                    //this.wait(500);//milliseconds
+                }
+                catch(InterruptedException interrupt){
+                    gameOutput=("Sorry, interrupt");
+                }
             }
-            System.out.println("fave color postcheck here: " +CloudMafia.here+" "+userName+" multithread: "+CloudMafia.multithread.availablePermits());
+            //System.out.println("fave color postcheck here: " +CloudMafia.here+" "+userName+" multithread: "+CloudMafia.multithread.availablePermits());
             //if(CloudMafia.multithread.availablePermits()==0){
-                CloudMafia.multithread.release();
+                //CloudMafia.multithread.release();
 
             //}
 
             state =STEPONE;
         }
         else if (state ==STEPONE) {
-            try {
+            /* try {
                 CloudMafia.multithread.acquire();
             }
             catch(InterruptedException e){
                 gameOutput="stupid semaphores";
-            }
+            }*/
             while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
                 try {
                     this.wait(500);//milliseconds
@@ -256,25 +278,31 @@ public class MafiaGame {
                 }
             }
 
-            CloudMafia.here4++;
+            CloudMafia.here2--;
             CloudMafia.mutex.release();
-            System.out.println("who is pre here4: " +CloudMafia.here4+" "+userName+" multithread: "+CloudMafia.multithread.availablePermits());
+            System.out.println("who is pre here4: " +CloudMafia.here4+" "+userName);
             gameOutput = ("Who is in the mafia?");
-            while(CloudMafia.here4!=CloudMafia.threadcount){
-
+            while(CloudMafia.here2!=0){
+                try {
+                    Thread.sleep(500);
+                    //this.wait(500);//milliseconds
+                }
+                catch(InterruptedException interrupt){
+                    gameOutput=("Sorry, interrupt");
+                }
             }
-            CloudMafia.multithread.release(CloudMafia.threadcount);
+            //CloudMafia.multithread.release(CloudMafia.threadcount);
 
-            System.out.println("who is post here4: "+ CloudMafia.here4+" "+userName+" multithread: "+CloudMafia.multithread.availablePermits());
+            System.out.println("who is post here2: "+ CloudMafia.here4+" "+userName);
             state = VOTED;
         }
         else if (state == VOTED){
-            try {
+            /*try {
                 CloudMafia.multithread.acquire();
             }
             catch(InterruptedException e){
                 gameOutput="stupid semaphores";
-            }
+            }*/
             while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
                 try {
                     this.wait(500);//milliseconds
@@ -303,19 +331,21 @@ public class MafiaGame {
             CloudMafia.here++;
             CloudMafia.mutex.release();
             //Wait until all threads have finished this step to display results!!!
-            System.out.println("looks like here: "+ CloudMafia.here+" "+userName+" multithread: "+CloudMafia.multithread.availablePermits());
+            System.out.println("looks like here: "+ CloudMafia.here+" "+userName);
             while(CloudMafia.here!=CloudMafia.threadcount){
+                try {
+                    Thread.sleep(500);
+                    //this.wait(500);//milliseconds
+                }
+                catch(InterruptedException interrupt){
+                    gameOutput=("Sorry, interrupt");
+                }
             }
-            CloudMafia.multithread.release();
+            //CloudMafia.multithread.release();
             state=ROUNDN;
         }
         else if (state==ROUNDN){
-            try {
-                CloudMafia.multithread.acquire();
-            }
-            catch(InterruptedException e){
-                gameOutput="stupid semaphores";
-            }
+
 
             while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
                 try {
@@ -343,10 +373,16 @@ public class MafiaGame {
             }
 
             while(CloudMafia.here2!=CloudMafia.threadcount){
-
+                try {
+                    Thread.sleep(500);
+                    //this.wait(500);//milliseconds
+                }
+                catch(InterruptedException interrupt){
+                    gameOutput=("Sorry, interrupt");
+                }
             }
             //if(CloudMafia.multithread.availablePermits()==0){
-                CloudMafia.multithread.release();
+              //  CloudMafia.multithread.release();
             //}
             state=GOTNAME;
         }

@@ -78,6 +78,11 @@ public static boolean timeCheckgame(){
             }
             multithread=new Semaphore(threadcount,true);
             multithread.release(threadcount);
+            //while(true){
+           //     if(here==threadcount){
+            ///        System.out.println("It'll work");
+           //     }
+           // }
             //if(here==threadcount){
               //  multithread.release(threadcount);
             //}
