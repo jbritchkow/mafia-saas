@@ -36,7 +36,18 @@ public class MafiaGame {
             //TODO: SANITIZE INPUT
             int loccode = Integer.parseInt(userInput);//error forced me to do this
             if(loccode==CloudMafia.code){
-
+                while(!CloudMafia.mutex.tryAcquire()){ //readwritelock?
+                    try {
+                        this.wait(500);//milliseconds
+                    }
+                    catch(InterruptedException interrupt){
+                        gameOutput=("Sorry, interrupt");
+                    }
+                }
+                //acquired mutex
+                CloudMafia.threadcount++;
+                CloudMafia.mutex.release();
+                System.out.println(CloudMafia.threadcount+"");
                 gameOutput="You have entered game " +CloudMafia.code + "! Hit enter to get started!";
                 state = GOTCODE;
             }
@@ -46,18 +57,7 @@ public class MafiaGame {
             }
         }
         else if (state == GOTCODE){
-            while(!CloudMafia.mutex.tryAcquire()){ //readwritelock?
-                try {
-                    this.wait(500);//milliseconds
-                }
-                catch(InterruptedException interrupt){
-                    gameOutput=("Sorry, interrupt");
-                }
-            }
-            //acquired mutex
-            CloudMafia.threadcount++;
-            CloudMafia.mutex.release();
-            System.out.println(CloudMafia.threadcount+"");
+
             gameOutput="Please enter your name!";
                 state=ASKEDNAME;
 
