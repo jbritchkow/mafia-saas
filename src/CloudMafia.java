@@ -11,6 +11,8 @@ public static DatabaseHelper dbHelper;
 public static int threadcount;
 public static int here;
 public static int here2;
+public static int here3;
+public static int here4;
 //public static int threadCount;
 private static final Object lock = new Object();//not a real lock
 private static long checkTime;
@@ -25,7 +27,7 @@ public static boolean timeCheck(){
             //long checkTime=finishTime-startTime;
             System.out.println(checkTime);
             if(checkTime>30000) {
-                lock.wait(1000);
+                lock.wait(500);
                 lock.notify();
                 return false;
             }
@@ -54,9 +56,9 @@ public static boolean timeCheckgame(){
         are easy to compare and easy to randomize.
         */
         code =15323;
-        here=0;
+        here=here2=here3=here4=0;
         mutex= new Semaphore(1,true);
-        mutex.release(1);
+        //mutex.release();
         userid=0;
         System.out.println(code+"");
         boolean listening=true;
@@ -76,7 +78,9 @@ public static boolean timeCheckgame(){
             }
             multithread=new Semaphore(threadcount,true);
             multithread.release(threadcount);
-
+            //if(here==threadcount){
+              //  multithread.release(threadcount);
+            //}
             //Could check per thread, if state equals, then wait...?
         } catch (IOException e) {
             System.err.println("Could not listen on port " + portNumber);
