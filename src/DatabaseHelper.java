@@ -1,9 +1,14 @@
+import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
+
+import javax.sql.PooledConnection;
 import java.sql.*;
 import java.util.HashMap;
 
 public class DatabaseHelper {
+    private PooledConnection poolConn;
     private Connection conn;
     private String connectionString;
+    private MysqlConnectionPoolDataSource ds;
     public enum States {
         LIVING ("LIVING"),
         DEAD ("DEAD"),
@@ -23,11 +28,15 @@ public class DatabaseHelper {
 
     public DatabaseHelper(String connString) {
         connectionString = connString;
+        ds = new MysqlConnectionPoolDataSource();
+        ds.setUrl(connString);
     }
 
     public void connect() {
         try {
-            conn = DriverManager.getConnection(connectionString);
+            //conn = DriverManager.getConnection(connectionString);
+            poolConn = ds.getPooledConnection();
+            conn = poolConn.getConnection();
         } catch (SQLException ex) {
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());
@@ -37,6 +46,8 @@ public class DatabaseHelper {
     public void disconnect() {
         try {
             conn.close();
+            conn = null;
+            poolConn.close();
         } catch (SQLException ex) {
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());
