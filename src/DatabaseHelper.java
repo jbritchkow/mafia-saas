@@ -98,8 +98,29 @@ public class DatabaseHelper {
 
         return uniqueName;
     }
-    public boolean assignPlayerRoles(int gameId) {
-        return false;
+    public boolean assignRoleToPlayer(int gameId, int playerId, String role) {
+        Statement stmt = null;
+        boolean success = true;
+        try {
+            connect();
+            stmt = conn.createStatement();
+            stmt.execute("update Players set Role='" + role +
+                    "' where GameId='" + gameId + "' and Id='" + playerId + "'");
+        }
+        catch (SQLException ex) {
+            success = false;
+            System.out.println("SQLException: " + ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+        }
+        finally {
+            if (stmt != null)
+                try {
+                    stmt.close();
+                } catch (SQLException e) {}
+            disconnect();
+        }
+        return success;
     }
     public boolean assignStateToPlayer(int gameId, int playerId, String state) {
         Statement stmt = null;
