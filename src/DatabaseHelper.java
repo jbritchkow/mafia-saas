@@ -1,10 +1,25 @@
 import java.sql.*;
 import java.util.HashMap;
-import java.util.concurrent.ExecutionException;
 
 public class DatabaseHelper {
     private Connection conn;
     private String connectionString;
+    public enum States {
+        LIVING ("LIVING"),
+        DEAD ("DEAD"),
+        HEALED ("HEALED"),
+        MARKED ("MARKED");
+        private final String name;
+        private States (String s) {
+            name = s;
+        }
+        public boolean equalsState(String otherName) {
+            return name.equals(otherName);
+        }
+        public String toString() {
+            return this.name;
+        }
+    };
 
     public DatabaseHelper(String connString) {
         connectionString = connString;
@@ -75,6 +90,62 @@ public class DatabaseHelper {
     public boolean assignPlayerRoles(int gameId) {
         return false;
     }
+    public boolean assignStateToPlayer(int gameId, int playerId, String state) {
+        Statement stmt = null;
+        boolean success = true;
+        try {
+            connect();
+            stmt = conn.createStatement();
+            if (States.MARKED.equalsState(state))
+                stmt.execute("update Players set State='" + state +
+                        "' where GameId='" + gameId + "' and Id='" + playerId + "' and State!='" + States.HEALED + "'");
+            else
+                stmt.execute("update Players set State='" + state +
+                    "' where GameId='" + gameId + "' and Id='" + playerId + "'");
+        }
+        catch (SQLException ex) {
+            success = false;
+            System.out.println("SQLException: " + ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+        }
+        finally {
+            if (stmt != null)
+                try {
+                    stmt.close();
+                } catch (SQLException e) {}
+            disconnect();
+        }
+        return success;
+    }
+    public boolean resetPlayerStatesForNextTurn(int gameId) {
+        Statement stmt = null;
+        boolean success = true;
+        try {
+            connect();
+            stmt = conn.createStatement();
+            stmt.execute("update Players set State='" + States.DEAD +
+                    "' where GameId='" + gameId + "' and State='" + States.MARKED + "'");
+
+            stmt = conn.createStatement();
+            stmt.execute("update Players set State='" + States.LIVING +
+                    "' where GameId='" + gameId + "' and State='" + States.HEALED + "'");
+        }
+        catch (SQLException ex) {
+            success = false;
+            System.out.println("SQLException: " + ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+        }
+        finally {
+            if (stmt != null)
+                try {
+                    stmt.close();
+                } catch (SQLException e) {}
+            disconnect();
+        }
+        return success;
+    }
     public String getPlayerRole(int gameId, int playerId) {
         Statement stmt = null;
         ResultSet rs = null;
@@ -86,6 +157,37 @@ public class DatabaseHelper {
             if (!rs.next())
                 throw new Exception("Could not find player");
             role = rs.getString("Role");
+        }
+        catch (SQLException ex) {
+            System.out.println("SQLException: " + ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+        }
+        catch (Exception ex) {System.out.println(ex.getMessage()); }
+        finally {
+            if (rs != null)
+                try {
+                    rs.close();
+                } catch (SQLException e) {}
+            if (stmt != null)
+                try {
+                    stmt.close();
+                } catch (SQLException e) {}
+            disconnect();
+        }
+        return role;
+    }
+    public String getPlayerStatus(int gameId, int playerId) {
+        Statement stmt = null;
+        ResultSet rs = null;
+        String role = null;
+        try {
+            connect();
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("select * from Players where GameId='" + gameId + "' and Id='" + playerId+ "'");
+            if (!rs.next())
+                throw new Exception("Could not find player");
+            role = rs.getString("Status");
         }
         catch (SQLException ex) {
             System.out.println("SQLException: " + ex.getMessage());
@@ -146,7 +248,43 @@ public class DatabaseHelper {
         try {
             connect();
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("select * from Players where GameId='" + gameId + "' and State='LIVING'");
+            rs = stmt.executeQuery("select * from Players where GameId='" +
+                    gameId + "' and (State='" + States.LIVING + "' or State='" + States.HEALED +
+                    "' or State='" + States.MARKED + "')");
+
+            while (rs.next()) {
+                int id = rs.getInt("Id");
+                String name = rs.getString("Name");
+                players.put(id, name);
+            }
+        }
+        catch (SQLException ex) {
+            System.out.println("SQLException: " + ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+        }
+        finally {
+            if (rs != null)
+                try {
+                    rs.close();
+                } catch (SQLException e) {}
+            if (stmt != null)
+                try {
+                    stmt.close();
+                } catch (SQLException e) {}
+            disconnect();
+        }
+        return players;
+    }
+    public HashMap<Integer, String> getPlayersWithStatus(int gameId, String state) {
+        HashMap<Integer, String> players = new HashMap<Integer, String>();
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            connect();
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("select * from Players where GameId='" +
+                    gameId + "' and State='" + state + "'");
 
             while (rs.next()) {
                 int id = rs.getInt("Id");
@@ -178,7 +316,7 @@ public class DatabaseHelper {
         try {
             connect();
             stmt = conn.createStatement();
-            stmt.executeQuery("delete * from Players where GameId='" + gameId + "'");
+            stmt.execute("delete from Players where GameId='" + gameId + "'");
         }
         catch (SQLException ex) {
             success = false;
