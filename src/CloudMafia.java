@@ -70,15 +70,21 @@ public static boolean timeCheckgame(){
         // Run some code;
         long finishTime =0;
         //long checkTime;
-        int portNumber = 444;//Random port, can customize later. prev: Integer.parseInt(args[0]);
+        int portNumber = 4444;//Random port, can customize later. prev: Integer.parseInt(args[0]);
+        ArrayList<MafiaSThread> threads = new ArrayList<MafiaSThread>();
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
             while (listening) {
-                new MafiaSThread(serverSocket.accept()).start();
+                MafiaSThread thread = new MafiaSThread(serverSocket.accept());
+                thread.start();
+                threads.add(thread);
                 finishTime=System.currentTimeMillis();
                 checkTime=finishTime-startTime;
                 listening=timeCheck();
                 System.out.println(listening);
 
+                for (MafiaSThread t : threads) {
+                    new AsyncMessage(t, "There are now " + threads.size() + " players in the game.").start();
+                }
             }
             votes=new int [userid+threadcount+1];
             for(int i=0;i<votes.length;i++){
