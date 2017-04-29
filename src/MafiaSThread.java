@@ -35,7 +35,7 @@ public class MafiaSThread extends Thread {
         ) {
             out = new PrintWriter(socket.getOutputStream(), true);
             String inputLine, outputLine;
-            MafiaGame mg = new MafiaGame();//service class
+            MafiaGame2 mg = new MafiaGame2();//service class
             outputLine = mg.processGame(null);
             out.println(outputLine);
 

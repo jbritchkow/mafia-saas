@@ -11,6 +11,7 @@ public static Semaphore multithread;
 public static int userid;
 public static DatabaseHelper dbHelper;
 public static int threadcount;
+public static int gameOverCondition;
 public static int here;
 public static int here2;
 public static int [] votes;
@@ -60,7 +61,7 @@ public static boolean timeCheckgame(){
         */
 
         here=here2=0;
-
+        gameOverCondition=0;
         mutex= new Semaphore(1,true);
         //mutex.release();
         userid=20;

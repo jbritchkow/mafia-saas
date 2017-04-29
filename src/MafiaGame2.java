@@ -101,10 +101,10 @@ public class MafiaGame2 {
     private String processWaiting(String userInput) {
         System.out.println("in waiting");
 
-        if (CloudMafia.timeCheckgame()) {
+        if (CloudMafia.timeCheck()) {
             //checks to see if time has passed. spins.
             state = WAITING;
-            return "Waiting... Press enter after a few seconds to try again.";
+            return "Waiting... Hit enter after a few seconds to try again.";
         } else {
             state = DONEWAIT;
             return "Looks like the game has started! Hit enter to get going.";
@@ -114,15 +114,6 @@ public class MafiaGame2 {
     private String processDoneWait(String userInput) {
         String gameOutput = "";
         System.out.println("in donewait");
-        //System.out.println(CloudMafia.multithread.availablePermits() +" permits start dunwait " + userName);
-            /*try {
-                CloudMafia.multithread.acquire();
-            }
-            catch(InterruptedException e){
-                gameOutput="stupid semaphores";
-            }
-            System.out.println(CloudMafia.multithread.availablePermits()+" permits avail after first get "+userName+" here "+CloudMafia.here);
-            */
         while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
             try {
                 Thread.sleep(500);
@@ -131,17 +122,12 @@ public class MafiaGame2 {
                 gameOutput = ("Sorry, interrupt");
             }
         }
-        //System.out.println(userName+" Got mutex " + CloudMafia.mutex.availablePermits());
-        //acquired mutex
-
         id = CloudMafia.userid++;
-
         boolean database = CloudMafia.dbHelper.checkNameAndAddPlayerToGame(CloudMafia.code, id, userName);
         int n = 0;
         while (!database) {
             n++;
             database = CloudMafia.dbHelper.checkNameAndAddPlayerToGame(CloudMafia.code, id, userName + "" + n);
-
         }
         if (n > 0) {
             gameOutput = "Sorry, that name was taken. You are now " + userName + "" + n + ".";
@@ -149,11 +135,8 @@ public class MafiaGame2 {
         }
 
         //TODO: ASSIGN ROLE
-        //threadid as userid????? How else to attach thread/user?
         CloudMafia.here++;
         CloudMafia.mutex.release();
-        //System.out.println(userName+"released mutex"+CloudMafia.mutex.availablePermits());
-        //System.out.println(CloudMafia.multithread.availablePermits()+" permits avail check1 "+userName + "here "+CloudMafia.here);
 
         while (CloudMafia.here != CloudMafia.threadcount) {
             try {
@@ -163,22 +146,10 @@ public class MafiaGame2 {
                 gameOutput = ("Sorry, interrupt");
             }
         }
-
-        //might be a race condition. May need mutex.
         System.out.println(userName + "here pre database" + CloudMafia.here);
-        //if(CloudMafia.multithread.availablePermits()==0){
-        //CloudMafia.multithread.release();
-        //}
-        //System.out.println(CloudMafia.multithread.availablePermits()+" permits avail after release1 "+userName);
         gameOutput += "You are a " + role + ".";
+
         //First step of this method complete: All data in the database. Now for second step.
-           /* try {
-                CloudMafia.multithread.acquire();
-            }
-            catch(InterruptedException e){
-                gameOutput="stupid semaphores";
-            }*/
-        //System.out.println(CloudMafia.multithread.availablePermits()+" permits avail after get2 "+userName + "mutex: "+CloudMafia.mutex.availablePermits());
         while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
             try {
                 Thread.sleep(500);//milliseconds
@@ -187,8 +158,6 @@ public class MafiaGame2 {
             }
         }
         if (!role.equals("Civilian")) {
-
-            //System.out.println("got mutex "+userName);
             HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
             for (int i = 0; i <= CloudMafia.userid; i++) {
                 if (map.get(i) != null)
@@ -205,11 +174,9 @@ public class MafiaGame2 {
             // System.out.println("released mutex "+userName);
 
         }
-        //released mutex. Now another thread can access database.
-        //CloudMafia.threadCount++
         CloudMafia.here2++;
         CloudMafia.mutex.release();
-        if (role.equals("Civilian")) {//hardcoded for now. fix later.
+        if (role.equals("Civilian")) {
             gameOutput += " What is your quest?";
         }
 
@@ -223,23 +190,13 @@ public class MafiaGame2 {
                 gameOutput = ("Sorry, interrupt");
             }
         }
-        //might be a race condition. May need mutex.
-        //if(CloudMafia.multithread.availablePermits()==0){
-        //CloudMafia.multithread.release();
-        //}
-        //System.out.println(CloudMafia.multithread.availablePermits()+" permits avail postrelease2 "+userName);
         state = GOTNAME;
         return gameOutput;
     }
 
     private String processGotName(String userInput) {
         String gameOutput = "";
-        /*try {
-                CloudMafia.multithread.acquire();
-            }
-            catch(InterruptedException e){
-                gameOutput="stupid semaphores";
-            }*/
+
         while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
             try {
                 Thread.sleep(500);//milliseconds
@@ -251,26 +208,47 @@ public class MafiaGame2 {
             HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
 
             if (role.equals("Police")) {
-
                 //TODO: Compare user input to database
                 //TODO: What do if user inputs bad input ie a name that is not a name?
-                // TODO: Write results to database
                 for (int i = 0; i <= CloudMafia.userid; i++) {
-                    if (map.get(i) != null)
+                    if (map.get(i) != null) {
                         if (userInput.equals(map.get(i))) {
-                            //check if mafia
+                            String playerRole = CloudMafia.dbHelper.getPlayerRole(CloudMafia.code, i);
+                            if (playerRole == "Mafia") {
+                                gameOutput = "Don't tell anyone I said this, but... yeah, " + userInput + " is in the mafia.";
+                            }
                         } else {
                             gameOutput = "Sorry, that player is not in the mafia.";
                         }
-
+                    }
                 }
             }
             if (role.equals("Doctor")) {
+                for (int i = 0; i <= CloudMafia.userid; i++) {
+                    if (map.get(i) != null) {
+                        if (userInput.equals(map.get(i))) {
+                            CloudMafia.dbHelper.assignStateToPlayer(CloudMafia.code, i,"HEALED");
+                        }
+                    }
+                }
+
                 //TODO: see police
             }
             if (role.equals("Mafia")) {
-                //TODO: find other mafia member
-                //TODO: mafia communicate and choose someone to kill
+                if(CloudMafia.gameOverCondition==0) {
+                    //TODO: find other mafia member
+                    //TODO: mafia communicate and choose someone to kill
+                }
+
+                for (int i = 0; i <= CloudMafia.userid; i++) {
+                    if (map.get(i) != null) {
+                        if (userInput.equals(map.get(i))) {
+                            String playerStatus=CloudMafia.dbHelper.getPlayerStatus(CloudMafia.code,i);
+                            if(playerStatus.equals("LIVING"))
+                            CloudMafia.dbHelper.assignStateToPlayer(CloudMafia.code, i,"MARKED");
+                        }
+                    }
+                }
                 //we can always back down to one mafia member if this turns out to be too much
             }
 
@@ -290,24 +268,12 @@ public class MafiaGame2 {
                 gameOutput = ("Sorry, interrupt");
             }
         }
-        //System.out.println("fave color postcheck here: " +CloudMafia.here+" "+userName+" multithread: "+CloudMafia.multithread.availablePermits());
-        //if(CloudMafia.multithread.availablePermits()==0){
-        //CloudMafia.multithread.release();
-
-        //}
-
         state = STEPONE;
         return gameOutput;
     }
 
     private String processStepOne(String userInput) {
         String gameOutput = "";
-        /* try {
-                CloudMafia.multithread.acquire();
-            }
-            catch(InterruptedException e){
-                gameOutput="stupid semaphores";
-            }*/
         while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
             try {
                 Thread.sleep(500);//milliseconds
@@ -328,7 +294,6 @@ public class MafiaGame2 {
                 gameOutput = ("Sorry, interrupt");
             }
         }
-        //CloudMafia.multithread.release(CloudMafia.threadcount);
 
         System.out.println("who is post here2: " + CloudMafia.here2 + " " + userName);
         state = VOTED;
@@ -337,12 +302,6 @@ public class MafiaGame2 {
 
     private String processVoted(String userInput) {
         String gameOutput = "";
-        /*try {
-                CloudMafia.multithread.acquire();
-            }
-            catch(InterruptedException e){
-                gameOutput="stupid semaphores";
-            }*/
         while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
             try {
                 Thread.sleep(500);//milliseconds
@@ -363,9 +322,6 @@ public class MafiaGame2 {
 
             }
             //TODO: sum votes across threads
-            //arraylist.add for votes? 2d array with 0s if no votes?
-            //TODO: Write results to database
-
         }
 
         CloudMafia.here++;
@@ -382,7 +338,6 @@ public class MafiaGame2 {
                 gameOutput = ("Sorry, interrupt");
             }
         }
-        //if(CloudMafia.here==0) {
         int max = 0;
         int mafia = 0;
         for (int i = 0; i < CloudMafia.votes.length; i++) {
@@ -390,16 +345,19 @@ public class MafiaGame2 {
                 max = CloudMafia.votes[i];
                 mafia = i;
             }
-            //System.out.println(CloudMafia.votes[i]);
         }
-        //}
+        gameOutput = "You voted that " + map.get(mafia) + " was in the mafia!";
+        CloudMafia.dbHelper.assignStateToPlayer(CloudMafia.code, mafia, "DEAD");
+        if(CloudMafia.dbHelper.getPlayerRole(CloudMafia.code, mafia).equals("Mafia")){
+            CloudMafia.gameOverCondition++;
+            gameOutput+=" And you were right!";
+        }
+        else gameOutput+=" Unfortunately, they were not.";
         // TODO: Display results; show if sucessful or not
         //TODO: If all mafia dead, gameOutput=Game Over
-        //TODO: else, set state back to gotname and restart
-        //TODO: if this thread is dead, ouput=game over
-        //TODO: Check if 'mafia' is mafia
-        //TODO: set 'mafia' to dead status
-        gameOutput = "You voted that " + map.get(mafia) + " was in the mafia!";
+        //TODO: else, set state back to roundn and restart
+        //done: if this thread is dead, ouput=game over
+
         //gameOutput="Looks like the mafia is still out there! Hit enter to start another round.";
         //CloudMafia.multithread.release();
         state = ROUNDN;
@@ -407,48 +365,56 @@ public class MafiaGame2 {
     }
 
     private String processRoundN(String userInput) {
-        String gameOutput = "";
-        while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
-            try {
-                this.wait(500);//milliseconds
-            } catch (InterruptedException interrupt) {
-                gameOutput = ("Sorry, interrupt");
+        boolean reset =false;
+        while(!reset) reset=CloudMafia.dbHelper.resetPlayerStatesForNextTurn(CloudMafia.code);
+        String playerstate =CloudMafia.dbHelper.getPlayerStatus(CloudMafia.code, id);
+        if(playerstate.equals("LIVING")&&CloudMafia.gameOverCondition<2) {
+            String gameOutput = "";
+            while (!CloudMafia.mutex.tryAcquire()) {
+                try {
+                    this.wait(500);//milliseconds
+                } catch (InterruptedException interrupt) {
+                    gameOutput = ("Sorry, interrupt");
+                }
             }
-        }
-        HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
-        for (int i = 0; i <= CloudMafia.userid; i++) {
-            if (map.get(i) != null)
-                gameOutput += " " + map.get(i) + "; ";
+            HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
+            for (int i = 0; i <= CloudMafia.userid; i++) {
+                if (map.get(i) != null)
+                    gameOutput += " " + map.get(i) + "; ";
 
-        }
-        //acquired mutex
-        if (role.equals("Police")) {
-            gameOutput = "Take a guess. Who is in the mafia?";
-        } else if (role.equals("Doctor")) {
-            gameOutput = "Quick, choose someone to save!";
-        } else if (role.equals("Mafia")) {
-            gameOutput = "Whose turn is it to die?";
-        }
-        CloudMafia.here2++;
-        CloudMafia.mutex.release();
-        //released mutex. Now another thread can access database.
-
-        if (role.equals("Civilian")) {
-            gameOutput = "What is your favorite food?";//hardcoded for now. fix later.
-        }
-
-        while (CloudMafia.here2 != CloudMafia.threadcount) {
-            try {
-                Thread.sleep(500);
-                //this.wait(500);//milliseconds
-            } catch (InterruptedException interrupt) {
-                gameOutput = ("Sorry, interrupt");
             }
+            //acquired mutex
+            if (role.equals("Police")) {
+                gameOutput = "Take a guess. Who is in the mafia?";
+            } else if (role.equals("Doctor")) {
+                gameOutput = "Quick, choose someone to save!";
+            } else if (role.equals("Mafia")) {
+                gameOutput = "Whose turn is it to die?";
+            }
+            CloudMafia.here2++;
+            CloudMafia.mutex.release();
+            //released mutex. Now another thread can access database.
+
+            if (role.equals("Civilian")) {
+                gameOutput = "What is your favorite food?";//hardcoded for now. fix later.
+            }
+
+            while (CloudMafia.here2 != CloudMafia.threadcount) {
+                try {
+                    Thread.sleep(500);
+                    //this.wait(500);//milliseconds
+                } catch (InterruptedException interrupt) {
+                    gameOutput = ("Sorry, interrupt");
+                }
+            }
+            //if(CloudMafia.multithread.availablePermits()==0){
+            //  CloudMafia.multithread.release();
+            //}
+            state = GOTNAME;
+            return gameOutput;
         }
-        //if(CloudMafia.multithread.availablePermits()==0){
-        //  CloudMafia.multithread.release();
-        //}
-        state = GOTNAME;
-        return gameOutput;
+        else{
+            return "Game Over";
+        }
     }
 }
