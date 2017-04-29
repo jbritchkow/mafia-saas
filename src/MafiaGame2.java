@@ -17,7 +17,7 @@ public class MafiaGame2 {
 
     private int state = GAMESTART;
     private String userName = "";
-    private String role = "Police";
+    private String role = "";
     private int id = 0;
 
     //private int code =0;
@@ -133,7 +133,23 @@ public class MafiaGame2 {
             gameOutput = "Sorry, that name was taken. You are now " + userName + "" + n + ".";
             userName = userName + "" + n;
         }
-
+        database = false;
+        if(id==1){
+            while(!database) database = CloudMafia.dbHelper.assignRoleToPlayer(CloudMafia.code, id, "Police");
+            role="Police";
+        }
+        else if (id==2){
+            while(!database) database = CloudMafia.dbHelper.assignRoleToPlayer(CloudMafia.code, id, "Doctor");
+            role="Doctor";
+        }
+        else if(id==3||id==4){
+            while(!database) database = CloudMafia.dbHelper.assignRoleToPlayer(CloudMafia.code, id, "Mafia");
+            role="Mafia";
+        }
+        else {
+            while (!database) database = CloudMafia.dbHelper.assignRoleToPlayer(CloudMafia.code, id, "Civilian");
+            role="Civilian";
+        }
         //TODO: ASSIGN ROLE
         CloudMafia.here++;
         CloudMafia.mutex.release();
