@@ -551,7 +551,7 @@ public class MafiaGame2 {
             //if(CloudMafia.multithread.availablePermits()==0){
             //  CloudMafia.multithread.release();
             //}
-            state = GOTNAME;
+            //state = GOTNAME;
             return gameOutput;
         }
         else{
