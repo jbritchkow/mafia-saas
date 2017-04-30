@@ -49,7 +49,7 @@ public static boolean timeCheckgame(){
     return true;
 }
     public static void main(String args[]){
-    code =15323;
+    code =15324;
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
         } catch(Exception e) { return; }
@@ -133,24 +133,52 @@ public static boolean timeCheckgame(){
             counts.put(id, (counts.containsKey(id) ? counts.get(id) + 1 : 1));
         }
         String message = "";
+        int chosen = 0;
         for (Integer id : counts.keySet()) {
+            if (counts.get(id) == mafiaThreads.size()) {
+                chosenCondition = true;
+                chosen = id;
+                break;
+            }
             String name = dbHelper.getPlayerName(code, id);
             message += name + " has " + counts.get(id) + " vote(s)\n";
-            if (counts.get(id) == mafiaThreads.size())
-                chosenCondition = true;
         }
         if (mafiaChoices.size() < mafiaThreads.size())
             message += (mafiaThreads.size() - mafiaChoices.size()) + " mafia have not voted\n";
+        if (chosenCondition) {
+            message += "The mafia has chosen " + dbHelper.getPlayerName(code, chosen) + " to suffer.";
+            dbHelper.assignStateToPlayer(code, chosen, DatabaseHelper.States.MARKED.toString());
+        }
 
         for (MafiaSThread thread : mafiaThreads) {
             new AsyncMessage(thread, message).start();
+            if (chosenCondition) {
+                thread.endMafiaVoting();
+            }
         }
         if (chosenCondition) {
-            for (MafiaSThread thread : threads) {
-                thread.endVoting();
-            }
+            finishAbilitiesStage();
             mafiaChoices = null;
         }
     }
 
+    private static int abilitiesCounter = 0;
+    public static void finishAbilitiesStage() {
+        while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
+            try {
+                Thread.sleep(500);
+                //this.wait(500);//milliseconds
+            } catch (InterruptedException interrupt) {
+                System.out.println("Sorry, interrupt");
+            }
+        }
+        abilitiesCounter ++;
+        if (abilitiesCounter == 3) {
+            abilitiesCounter = 0;
+            for (MafiaSThread thread : threads) {
+                thread.endVoting();
+            }
+        }
+        CloudMafia.mutex.release();
+    }
 }

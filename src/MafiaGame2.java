@@ -103,14 +103,13 @@ public class MafiaGame2 {
     }
 
     private String processAskedName(String userInput) {
-        if (userInput != "") {
+        if (!userInput.equals("")) {
             //TODO: SANITIZE INPUT
             userName = userInput;
             state = WAITING;
             return "Hello, " + userInput + "! Press enter to wait while others join the game.";
         } else {
-            state = GOTCODE;
-            return null;
+            return "Please enter your name!";
         }
     }
 
@@ -223,7 +222,7 @@ public class MafiaGame2 {
         if (role.equals("Civilian")) {
             gameOutput += " What is your quest?";
 
-                while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
+                /*while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
                     try {
                         Thread.sleep(500);
                         //this.wait(500);//milliseconds
@@ -232,7 +231,7 @@ public class MafiaGame2 {
                     }
                 }
                 CloudMafia.here2++;
-                CloudMafia.mutex.release();
+                CloudMafia.mutex.release();*/
             System.out.println("Civilian increment here2: "+CloudMafia.here2);
         }
 
@@ -260,7 +259,7 @@ public class MafiaGame2 {
             if (map.get(i) != null) {
                 if (userInput.equals(map.get(i))) {
                     //if(CloudMafia.gameOverCondition<2) { //probably going to need mutex here if keep this in
-                     //   String playerStatus=CloudMafia.dbHelper.getPlayerStatus(CloudMafia.code,i);
+                     //   String playerStatus=CloudMafia.dbHelper.getPlayerState(CloudMafia.code,i);
                      //   if(playerStatus.equals("LIVING"))
                      //       CloudMafia.dbHelper.assignStateToPlayer(CloudMafia.code, i,"MARKED");
                     //}
@@ -296,19 +295,9 @@ public class MafiaGame2 {
         if (!foundPlayer) {
             gameOutput = "That is not a name of a player. Type the name of a player";
         } else {
-            while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
-                try {
-                    Thread.sleep(500);
-                    //this.wait(500);//milliseconds
-                } catch (InterruptedException interrupt) {
-                    System.out.println("Sorry, interrupt");
-                }
-            }
-            CloudMafia.here2++;
-            CloudMafia.mutex.release();
-            System.out.println("Police increment here2: "+CloudMafia.here2);
             gameOutput += "\nClick enter to answer random questions.";
             state = CIVILIANLOOP;
+            CloudMafia.finishAbilitiesStage();
         }
         return gameOutput;
     }
@@ -329,17 +318,7 @@ public class MafiaGame2 {
         } else {
             state = CIVILIANLOOP;
 
-            while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
-                try {
-                    Thread.sleep(500);
-                    //this.wait(500);//milliseconds
-                } catch (InterruptedException interrupt) {
-                    System.out.println("Sorry, interrupt");
-                }
-            }
-            CloudMafia.here2++;
-            CloudMafia.mutex.release();
-            System.out.println("Doctor increment here2: "+CloudMafia.here2);
+            CloudMafia.finishAbilitiesStage();
             return "You have healed a player.\nClick enter to answer random questions.";
         }
     }
@@ -350,15 +329,18 @@ public class MafiaGame2 {
     }
 
     public void endVoting() {
-        while(CloudMafia.here2 != CloudMafia.threadcount) {
+        /*while(CloudMafia.here2 != CloudMafia.threadcount) {
             try {
                 Thread.sleep(200);
                 //this.wait(500);//milliseconds
             } catch (InterruptedException interrupt) {
                 System.out.println ("Sorry, interrupt");
             }
-        }
+        }*/
         state = STEPONE;
+    }
+    public void endMafiaVoting() {
+        state = CIVILIANLOOP;
     }
 
     private String processGotName(String userInput) {
@@ -410,8 +392,8 @@ public class MafiaGame2 {
                 for (int i = 0; i <= CloudMafia.userid; i++) {
                     if (map.get(i) != null) {
                         if (userInput.equals(map.get(i))) {
-                            String playerStatus=CloudMafia.dbHelper.getPlayerStatus(CloudMafia.code,i);
-                            if(playerStatus.equals("LIVING"))
+                            String playerState=CloudMafia.dbHelper.getPlayerState(CloudMafia.code,i);
+                            if(playerState.equals("LIVING"))
                             CloudMafia.dbHelper.assignStateToPlayer(CloudMafia.code, i,"MARKED");
                         }
                     }
@@ -534,7 +516,7 @@ public class MafiaGame2 {
     private String processRoundN(String userInput) {
         boolean reset =false;
         while(!reset) reset=CloudMafia.dbHelper.resetPlayerStatesForNextTurn(CloudMafia.code);
-        String playerstate =CloudMafia.dbHelper.getPlayerStatus(CloudMafia.code, id);
+        String playerstate =CloudMafia.dbHelper.getPlayerState(CloudMafia.code, id);
         if(playerstate.equals("LIVING")&&CloudMafia.gameOverCondition<2) {
             String gameOutput = "";
             while (!CloudMafia.mutex.tryAcquire()) {

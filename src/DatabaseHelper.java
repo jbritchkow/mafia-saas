@@ -240,7 +240,7 @@ public class DatabaseHelper {
         }
         return role;
     }
-    public String getPlayerStatus(int gameId, int playerId) {
+    public String getPlayerState(int gameId, int playerId) {
         Statement stmt = null;
         ResultSet rs = null;
         String role = null;
@@ -250,7 +250,7 @@ public class DatabaseHelper {
             rs = stmt.executeQuery("select * from Players where GameId='" + gameId + "' and Id='" + playerId+ "'");
             if (!rs.next())
                 throw new Exception("Could not find player");
-            role = rs.getString("Status");
+            role = rs.getString("State");
         }
         catch (SQLException ex) {
             System.out.println("SQLException: " + ex.getMessage());
@@ -339,7 +339,7 @@ public class DatabaseHelper {
         }
         return players;
     }
-    public HashMap<Integer, String> getPlayersWithStatus(int gameId, String state) {
+    public HashMap<Integer, String> getPlayersWithState(int gameId, String state) {
         HashMap<Integer, String> players = new HashMap<Integer, String>();
         Statement stmt = null;
         ResultSet rs = null;

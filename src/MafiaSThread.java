@@ -34,6 +34,10 @@ public class MafiaSThread extends Thread {
         mg.endVoting();
         socketOutput("Voting is finished. Press enter to continue.");
     }
+    public void endMafiaVoting() {
+        mg.endMafiaVoting();
+        socketOutput("Pretend to be a civilian for now.");
+    }
 
     public void run() {
 
@@ -49,6 +53,7 @@ public class MafiaSThread extends Thread {
             out.println(outputLine);
 
             while ((inputLine = in.readLine()) != null) {
+                socketOutput("Processing input, please wait");
                 outputLine = mg.processGame(inputLine);
                 socketOutput(outputLine);
                 if (outputLine.equals("Game over"))
