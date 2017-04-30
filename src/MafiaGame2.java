@@ -217,7 +217,7 @@ public class MafiaGame2 {
             // System.out.println("released mutex "+userName);
 
         }
-        //CloudMafia.here2++;
+        CloudMafia.here2++;
         CloudMafia.mutex.release();
         if (role.equals("Civilian")) {
             gameOutput += " What is your quest?";
@@ -232,7 +232,7 @@ public class MafiaGame2 {
                 }
                 CloudMafia.here2++;
                 CloudMafia.mutex.release();*/
-            System.out.println("Civilian increment here2: "+CloudMafia.here2);
+            //System.out.println("Civilian increment here2: "+CloudMafia.here2);
         }
 
         //}
