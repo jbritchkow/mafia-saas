@@ -221,18 +221,6 @@ public class MafiaGame2 {
         CloudMafia.mutex.release();
         if (role.equals("Civilian")) {
             gameOutput += " What is your quest?";
-
-                /*while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
-                    try {
-                        Thread.sleep(500);
-                        //this.wait(500);//milliseconds
-                    } catch (InterruptedException interrupt) {
-                        System.out.println("Sorry, interrupt");
-                    }
-                }
-                CloudMafia.here2++;
-                CloudMafia.mutex.release();*/
-            //System.out.println("Civilian increment here2: "+CloudMafia.here2);
         }
 
         //}
@@ -247,7 +235,6 @@ public class MafiaGame2 {
         }
         */
         //state = GOTNAME;
-        //DEAD CODE
         return gameOutput;
 
     }
@@ -518,6 +505,7 @@ public class MafiaGame2 {
         while(!reset) reset=CloudMafia.dbHelper.resetPlayerStatesForNextTurn(CloudMafia.code);
         String playerstate =CloudMafia.dbHelper.getPlayerState(CloudMafia.code, id);
         if(playerstate.equals("LIVING")&&CloudMafia.gameOverCondition<2) {
+            //From here, same as earlier step.
             String gameOutput = "";
             while (!CloudMafia.mutex.tryAcquire()) {
                 try {
@@ -535,10 +523,13 @@ public class MafiaGame2 {
             //acquired mutex
             if (role.equals("Police")) {
                 gameOutput = "Take a guess. Who is in the mafia?";
+                state=POLICELOOP;
             } else if (role.equals("Doctor")) {
                 gameOutput = "Quick, choose someone to save!";
+                state=DOCTORLOOP;
             } else if (role.equals("Mafia")) {
                 gameOutput = "Whose turn is it to die?";
+                state=MAFIALOOP;
             }
             CloudMafia.here++;
             CloudMafia.mutex.release();
@@ -546,6 +537,7 @@ public class MafiaGame2 {
 
             if (role.equals("Civilian")) {
                 gameOutput = "What is your favorite food?";//hardcoded for now. fix later.
+                state=CIVILIANLOOP;
             }
 
             while (CloudMafia.here != CloudMafia.threadcount) {
@@ -563,6 +555,7 @@ public class MafiaGame2 {
             return gameOutput;
         }
         else{
+            CloudMafia.threadcount--;
             return "Game Over";
         }
     }
