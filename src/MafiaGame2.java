@@ -211,8 +211,8 @@ public class MafiaGame2 {
                 gameOutput += " Quick, choose someone to save! Enter their username.";
             } else if (role.equals("Mafia")) {
                 gameOutput += " Whose turn is it to die? Enter their username.";
-                CloudMafia.here2++;
-                System.out.println("Mafia increment here2: "+ CloudMafia.here2);
+                //CloudMafia.here2++;
+                //System.out.println("Mafia increment here2: "+ CloudMafia.here2);
             }
             // System.out.println("released mutex "+userName);
 
