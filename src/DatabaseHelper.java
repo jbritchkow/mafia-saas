@@ -5,8 +5,6 @@ import java.sql.*;
 import java.util.HashMap;
 
 public class DatabaseHelper {
-    private PooledConnection poolConn;
-    private Connection conn;
     private String connectionString;
     private MysqlConnectionPoolDataSource ds;
     public enum States {
@@ -32,22 +30,20 @@ public class DatabaseHelper {
         ds.setUrl(connString);
     }
 
-    public void connect() {
+    public Connection connect() {
         try {
-            //conn = DriverManager.getConnection(connectionString);
-            poolConn = ds.getPooledConnection();
-            conn = poolConn.getConnection();
+            Connection conn = ds.getConnection();
+            return conn;
         } catch (SQLException ex) {
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());
             System.out.println("VendorError: " + ex.getErrorCode());
         }
+        return null;
     }
-    public void disconnect() {
+    public void disconnect(Connection conn) {
         try {
             conn.close();
-            conn = null;
-            poolConn.close();
         } catch (SQLException ex) {
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());
@@ -60,8 +56,9 @@ public class DatabaseHelper {
         boolean uniqueName = true;
         Statement stmt = null;
         ResultSet rs = null;
+        Connection conn = null;
         try {
-            connect();
+            conn = connect();
             stmt = conn.createStatement();
             rs = stmt.executeQuery("select * from Players where GameId='" + gameId + "' and Name='" + playerName + "'");
             //Check if this name already exists
@@ -93,7 +90,7 @@ public class DatabaseHelper {
                 try {
                     stmt.close();
                 } catch (Exception e) {}
-            disconnect();
+            disconnect(conn);
         }
 
         return uniqueName;
@@ -101,8 +98,9 @@ public class DatabaseHelper {
     public boolean assignRoleToPlayer(int gameId, int playerId, String role) {
         Statement stmt = null;
         boolean success = true;
+        Connection conn = null;
         try {
-            connect();
+            conn = connect();
             stmt = conn.createStatement();
             stmt.execute("update Players set Role='" + role +
                     "' where GameId='" + gameId + "' and Id='" + playerId + "'");
@@ -118,15 +116,16 @@ public class DatabaseHelper {
                 try {
                     stmt.close();
                 } catch (SQLException e) {}
-            disconnect();
+            disconnect(conn);
         }
         return success;
     }
     public boolean assignStateToPlayer(int gameId, int playerId, String state) {
         Statement stmt = null;
         boolean success = true;
+        Connection conn = null;
         try {
-            connect();
+            conn = connect();
             stmt = conn.createStatement();
             if (States.MARKED.equalsState(state))
                 stmt.execute("update Players set State='" + state +
@@ -146,15 +145,16 @@ public class DatabaseHelper {
                 try {
                     stmt.close();
                 } catch (SQLException e) {}
-            disconnect();
+            disconnect(conn);
         }
         return success;
     }
     public boolean resetPlayerStatesForNextTurn(int gameId) {
         Statement stmt = null;
         boolean success = true;
+        Connection conn = null;
         try {
-            connect();
+            conn = connect();
             stmt = conn.createStatement();
             stmt.execute("update Players set State='" + States.DEAD +
                     "' where GameId='" + gameId + "' and State='" + States.MARKED + "'");
@@ -174,7 +174,7 @@ public class DatabaseHelper {
                 try {
                     stmt.close();
                 } catch (SQLException e) {}
-            disconnect();
+            disconnect(conn);
         }
         return success;
     }
@@ -182,8 +182,9 @@ public class DatabaseHelper {
         Statement stmt = null;
         ResultSet rs = null;
         String role = null;
+        Connection conn = null;
         try {
-            connect();
+            conn = connect();
             stmt = conn.createStatement();
             rs = stmt.executeQuery("select * from Players where GameId='" + gameId + "' and Id='" + playerId+ "'");
             if (!rs.next())
@@ -205,7 +206,7 @@ public class DatabaseHelper {
                 try {
                     stmt.close();
                 } catch (SQLException e) {}
-            disconnect();
+            disconnect(conn);
         }
         return role;
     }
@@ -213,8 +214,9 @@ public class DatabaseHelper {
         Statement stmt = null;
         ResultSet rs = null;
         String role = null;
+        Connection conn = null;
         try {
-            connect();
+            conn = connect();
             stmt = conn.createStatement();
             rs = stmt.executeQuery("select * from Players where GameId='" + gameId + "' and Id='" + playerId+ "'");
             if (!rs.next())
@@ -236,7 +238,7 @@ public class DatabaseHelper {
                 try {
                     stmt.close();
                 } catch (SQLException e) {}
-            disconnect();
+            disconnect(conn);
         }
         return role;
     }
@@ -244,8 +246,9 @@ public class DatabaseHelper {
         Statement stmt = null;
         ResultSet rs = null;
         String role = null;
+        Connection conn = null;
         try {
-            connect();
+            conn = connect();
             stmt = conn.createStatement();
             rs = stmt.executeQuery("select * from Players where GameId='" + gameId + "' and Id='" + playerId+ "'");
             if (!rs.next())
@@ -267,7 +270,7 @@ public class DatabaseHelper {
                 try {
                     stmt.close();
                 } catch (SQLException e) {}
-            disconnect();
+            disconnect(conn);
         }
         return role;
     }
@@ -275,8 +278,9 @@ public class DatabaseHelper {
         HashMap<Integer, String> players = new HashMap<Integer, String>();
         Statement stmt = null;
         ResultSet rs = null;
+        Connection conn = null;
         try {
-            connect();
+            conn = connect();
             stmt = conn.createStatement();
             rs = stmt.executeQuery("select * from Players where GameId='" + gameId + "'");
 
@@ -300,7 +304,7 @@ public class DatabaseHelper {
                 try {
                     stmt.close();
                 } catch (SQLException e) {}
-            disconnect();
+            disconnect(conn);
         }
         return players;
     }
@@ -308,8 +312,9 @@ public class DatabaseHelper {
         HashMap<Integer, String> players = new HashMap<Integer, String>();
         Statement stmt = null;
         ResultSet rs = null;
+        Connection conn = null;
         try {
-            connect();
+            conn = connect();
             stmt = conn.createStatement();
             rs = stmt.executeQuery("select * from Players where GameId='" +
                     gameId + "' and (State='" + States.LIVING + "' or State='" + States.HEALED +
@@ -335,7 +340,7 @@ public class DatabaseHelper {
                 try {
                     stmt.close();
                 } catch (SQLException e) {}
-            disconnect();
+            disconnect(conn);
         }
         return players;
     }
@@ -343,8 +348,9 @@ public class DatabaseHelper {
         HashMap<Integer, String> players = new HashMap<Integer, String>();
         Statement stmt = null;
         ResultSet rs = null;
+        Connection conn = null;
         try {
-            connect();
+            conn = connect();
             stmt = conn.createStatement();
             rs = stmt.executeQuery("select * from Players where GameId='" +
                     gameId + "' and State='" + state + "'");
@@ -369,15 +375,16 @@ public class DatabaseHelper {
                 try {
                     stmt.close();
                 } catch (SQLException e) {}
-            disconnect();
+            disconnect(conn);
         }
         return players;
     }
     public boolean deleteGame(int gameId) {
         Statement stmt = null;
         boolean success = true;
+        Connection conn = null;
         try {
-            connect();
+            conn = connect();
             stmt = conn.createStatement();
             stmt.execute("delete from Players where GameId='" + gameId + "'");
         }
@@ -392,7 +399,7 @@ public class DatabaseHelper {
                 try {
                     stmt.close();
                 } catch (SQLException e) {}
-            disconnect();
+            disconnect(conn);
         }
         return success;
     }
