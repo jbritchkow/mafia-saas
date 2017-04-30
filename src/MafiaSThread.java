@@ -6,6 +6,7 @@ public class MafiaSThread extends Thread {
     private Socket socket = null;
     private final Semaphore sendOutput = new Semaphore(1, true);
     private PrintWriter out = null;
+    private MafiaGame2 mg;
     public MafiaSThread(Socket socket) {
         super("MafiaSThread");
         this.socket = socket;
@@ -26,6 +27,14 @@ public class MafiaSThread extends Thread {
         sendOutput.release();
     }
 
+    public String getRole() {
+        return mg.getRole();
+    }
+    public void endVoting() {
+        mg.endVoting();
+        socketOutput("Voting is finished. Press enter to continue.");
+    }
+
     public void run() {
 
         try (
@@ -35,7 +44,7 @@ public class MafiaSThread extends Thread {
         ) {
             out = new PrintWriter(socket.getOutputStream(), true);
             String inputLine, outputLine;
-            MafiaGame2 mg = new MafiaGame2();//service class
+            mg = new MafiaGame2();//service class
             outputLine = mg.processGame(null);
             out.println(outputLine);
 

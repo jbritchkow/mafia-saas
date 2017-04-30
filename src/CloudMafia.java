@@ -20,6 +20,7 @@ private static final Object lock = new Object();//not a real lock
 private static long checkTime;
 //private static long startTime;
 //private static long finishTime;
+    private static ArrayList<MafiaSThread> threads;
 
 public static boolean timeCheck(){
 
@@ -64,7 +65,7 @@ public static boolean timeCheckgame(){
         gameOverCondition=0;
         mutex= new Semaphore(1,true);
         //mutex.release();
-        userid=20;
+        userid=1;
         System.out.println(code+"");
         boolean listening=true;
         long startTime = System.currentTimeMillis();
@@ -72,7 +73,7 @@ public static boolean timeCheckgame(){
         long finishTime =0;
         //long checkTime;
         int portNumber = 4444;//Random port, can customize later. prev: Integer.parseInt(args[0]);
-        ArrayList<MafiaSThread> threads = new ArrayList<MafiaSThread>();
+        threads = new ArrayList<MafiaSThread>();
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
             while (listening) {
                 MafiaSThread thread = new MafiaSThread(serverSocket.accept());
@@ -105,6 +106,50 @@ public static boolean timeCheckgame(){
         } catch (IOException e) {
             System.err.println("Could not listen on port " + portNumber);
             System.exit(-1);
+        }
+    }
+
+    private static ArrayList<MafiaSThread> getMafiaThreads() {
+        ArrayList<MafiaSThread> list = new ArrayList<MafiaSThread>();
+        for (MafiaSThread thread : threads) {
+            if (thread.getRole().equals("Mafia"))
+                list.add(thread);
+        }
+        return list;
+    }
+
+    private static HashMap<Integer, Integer> mafiaChoices = null;
+    public static void mafiaChat(int mafiaId, int targetId) {
+        if (mafiaChoices == null)
+            mafiaChoices = new HashMap<Integer, Integer>();
+
+        ArrayList<MafiaSThread> mafiaThreads = getMafiaThreads();
+        boolean chosenCondition = false;
+
+        mafiaChoices.put(mafiaId, targetId);
+
+        HashMap<Integer, Integer> counts = new HashMap<Integer, Integer>();
+        for (Integer id : mafiaChoices.values()) {
+            counts.put(id, (counts.containsKey(id) ? counts.get(id) + 1 : 1));
+        }
+        String message = "";
+        for (Integer id : counts.keySet()) {
+            String name = dbHelper.getPlayerName(code, id);
+            message += name + " has " + counts.get(id) + " vote(s)\n";
+            if (counts.get(id) == mafiaThreads.size())
+                chosenCondition = true;
+        }
+        if (mafiaChoices.size() < mafiaThreads.size())
+            message += (mafiaThreads.size() - mafiaChoices.size()) + " mafia have not voted\n";
+
+        for (MafiaSThread thread : mafiaThreads) {
+            new AsyncMessage(thread, message).start();
+        }
+        if (chosenCondition) {
+            for (MafiaSThread thread : threads) {
+                thread.endVoting();
+            }
+            mafiaChoices = null;
         }
     }
 

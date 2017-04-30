@@ -13,12 +13,20 @@ public class MafiaGame2 {
     public static final int ROUNDN = 7;
     public static final int WAITING = 8;
     public static final int DONEWAIT = 9;
+    private static final int MAFIALOOP = 10;
+    private static final int POLICELOOP = 11;
+    private static final int DOCTORLOOP = 12;
+    private static final int CIVILIANLOOP = 13;
 
 
     private int state = GAMESTART;
     private String userName = "";
     private String role = "";
     private int id = 0;
+
+    public String getRole() {
+        return role;
+    }
 
     //private int code =0;
     public String processGame(String userInput) {
@@ -40,6 +48,14 @@ public class MafiaGame2 {
             return processWaiting(userInput);
         } else if (state == DONEWAIT) {
             return processDoneWait(userInput);
+        } else if (state == MAFIALOOP) {
+            return processMafiaInput(userInput);
+        } else if (state == POLICELOOP) {
+            return processPoliceInput(userInput);
+        } else if (state == DOCTORLOOP) {
+            return processDoctorInput(userInput);
+        } else if (state == CIVILIANLOOP) {
+            return processCivilianInput(userInput);
         } else if (state == GOTNAME) {
             return processGotName(userInput);
         } else if (state == STEPONE) {
@@ -137,18 +153,22 @@ public class MafiaGame2 {
         if(id==1){
             while(!database) database = CloudMafia.dbHelper.assignRoleToPlayer(CloudMafia.code, id, "Police");
             role="Police";
+            state = POLICELOOP;
         }
         else if (id==2){
             while(!database) database = CloudMafia.dbHelper.assignRoleToPlayer(CloudMafia.code, id, "Doctor");
             role="Doctor";
+            state = DOCTORLOOP;
         }
         else if(id==3||id==4){
             while(!database) database = CloudMafia.dbHelper.assignRoleToPlayer(CloudMafia.code, id, "Mafia");
             role="Mafia";
+            state = MAFIALOOP;
         }
         else {
             while (!database) database = CloudMafia.dbHelper.assignRoleToPlayer(CloudMafia.code, id, "Civilian");
             role="Civilian";
+            state = CIVILIANLOOP;
         }
         //TODO: ASSIGN ROLE
         CloudMafia.here++;
@@ -206,8 +226,79 @@ public class MafiaGame2 {
                 gameOutput = ("Sorry, interrupt");
             }
         }
-        state = GOTNAME;
+        //state = GOTNAME;
         return gameOutput;
+    }
+
+    private String processMafiaInput(String userInput) {
+        HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
+        for (int i = 0; i <= CloudMafia.userid; i++) {
+            if (map.get(i) != null) {
+                if (userInput.equals(map.get(i))) {
+                    //String playerStatus=CloudMafia.dbHelper.getPlayerStatus(CloudMafia.code,i);
+                    //if(playerStatus.equals("LIVING"))
+                    //    CloudMafia.dbHelper.assignStateToPlayer(CloudMafia.code, i,"MARKED");
+                    CloudMafia.mafiaChat(id, i);
+                }
+            }
+        }
+        return "Sent vote";
+    }
+
+    private String processPoliceInput(String userInput) {
+        String gameOutput = "";
+        boolean foundPlayer = false;
+        HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
+
+        //TODO: Compare user input to database
+        //TODO: What do if user inputs bad input ie a name that is not a name?
+        for (int i = 0; i <= CloudMafia.userid; i++) {
+            if (map.get(i) != null) {
+                if (userInput.equals(map.get(i))) {
+                    String playerRole = CloudMafia.dbHelper.getPlayerRole(CloudMafia.code, i);
+                    if (playerRole.equals("Mafia")) {
+                        gameOutput = "Don't tell anyone I said this, but... yeah, " + userInput + " is in the mafia.";
+                    } else {
+                        gameOutput = "Sorry, that player is not in the mafia.";
+                    }
+                    foundPlayer = true;
+                }
+            }
+        }
+        if (!foundPlayer) {
+            gameOutput = "That is not a name of a player. Type the name of a player";
+        } else {
+            gameOutput += "\nClick enter to answer random questions.";
+            state = CIVILIANLOOP;
+        }
+        return gameOutput;
+    }
+
+    private String processDoctorInput(String userInput) {
+        boolean foundPlayer = false;
+        HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
+        for (int i = 0; i <= CloudMafia.userid; i++) {
+            if (map.get(i) != null) {
+                if (userInput.equals(map.get(i))) {
+                    CloudMafia.dbHelper.assignStateToPlayer(CloudMafia.code, i,"HEALED");
+                    foundPlayer = true;
+                }
+            }
+        }
+        if (!foundPlayer) {
+            return "That is not a name of a player. Type the name of a player\nClick enter to answer random questions.";
+        } else {
+            state = CIVILIANLOOP;
+            return "You have healed a player";
+        }
+    }
+
+    private String processCivilianInput(String userInput) {
+        return "I want to ask you a random question.";
+    }
+
+    public void endVoting() {
+        state = STEPONE;
     }
 
     private String processGotName(String userInput) {
