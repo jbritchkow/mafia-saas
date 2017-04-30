@@ -509,7 +509,7 @@ public class MafiaGame2 {
             String gameOutput = "";
             while (!CloudMafia.mutex.tryAcquire()) {
                 try {
-                    this.wait(500);//milliseconds
+                    Thread.sleep(500);//milliseconds
                 } catch (InterruptedException interrupt) {
                     gameOutput = ("Sorry, interrupt");
                 }
@@ -556,6 +556,9 @@ public class MafiaGame2 {
         }
         else{
             CloudMafia.threadcount--;
+            if(role.equals("Doctor")||role.equals("Police")){
+                CloudMafia.livingAbilities--;
+            }
             return "Game Over";
         }
     }

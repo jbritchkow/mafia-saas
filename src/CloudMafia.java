@@ -15,6 +15,7 @@ public static int gameOverCondition;
 public static int here;
 public static int here2;
 public static int [] votes;
+public static int livingAbilities;
 //public static int threadCount;
 private static final Object lock = new Object();//not a real lock
 private static long checkTime;
@@ -49,7 +50,7 @@ public static boolean timeCheckgame(){
     return true;
 }
     public static void main(String args[]){
-    code =15324;
+    code =15323;
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
         } catch(Exception e) { return; }
@@ -66,6 +67,7 @@ public static boolean timeCheckgame(){
         mutex= new Semaphore(1,true);
         //mutex.release();
         userid=1;
+        livingAbilities=3;
         System.out.println(code+"");
         boolean listening=true;
         long startTime = System.currentTimeMillis();
@@ -173,7 +175,7 @@ public static boolean timeCheckgame(){
             }
         }
         abilitiesCounter ++;
-        if (abilitiesCounter == 3) {
+        if (abilitiesCounter == livingAbilities) {
             abilitiesCounter = 0;
             for (MafiaSThread thread : threads) {
                 thread.endVoting();
