@@ -379,6 +379,39 @@ public class DatabaseHelper {
         }
         return players;
     }
+    public boolean isMafiaOnlyRemaining(int gameId) {
+        boolean result = true;
+        Statement stmt = null;
+        ResultSet rs = null;
+        Connection conn = null;
+        try {
+            conn = connect();
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("select * from Players where GameId='" +
+                    gameId + "' and State!='" + States.DEAD.toString() + "' and Role!='Mafia'");
+
+            while (rs.next()) {
+                result = false;
+            }
+        }
+        catch (SQLException ex) {
+            System.out.println("SQLException: " + ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+        }
+        finally {
+            if (rs != null)
+                try {
+                    rs.close();
+                } catch (SQLException e) {}
+            if (stmt != null)
+                try {
+                    stmt.close();
+                } catch (SQLException e) {}
+            disconnect(conn);
+        }
+        return result;
+    }
     public boolean deleteGame(int gameId) {
         Statement stmt = null;
         boolean success = true;
