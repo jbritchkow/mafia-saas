@@ -178,6 +178,37 @@ public class DatabaseHelper {
         }
         return success;
     }
+    public String getPlayerName(int gameId, int playerId) {
+        Statement stmt = null;
+        ResultSet rs = null;
+        String role = null;
+        try {
+            connect();
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("select * from Players where GameId='" + gameId + "' and Id='" + playerId+ "'");
+            if (!rs.next())
+                throw new Exception("Could not find player");
+            role = rs.getString("Name");
+        }
+        catch (SQLException ex) {
+            System.out.println("SQLException: " + ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+        }
+        catch (Exception ex) {System.out.println(ex.getMessage()); }
+        finally {
+            if (rs != null)
+                try {
+                    rs.close();
+                } catch (SQLException e) {}
+            if (stmt != null)
+                try {
+                    stmt.close();
+                } catch (SQLException e) {}
+            disconnect();
+        }
+        return role;
+    }
     public String getPlayerRole(int gameId, int playerId) {
         Statement stmt = null;
         ResultSet rs = null;
