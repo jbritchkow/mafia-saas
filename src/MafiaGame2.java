@@ -23,6 +23,11 @@ public class MafiaGame2 {
     private String userName = "";
     private String role = "";
     private int id = 0;
+    private MafiaSThread thread = null;
+
+    public MafiaGame2(MafiaSThread thread) {
+        this.thread = thread;
+    }
 
     public String getRole() {
         return role;
@@ -240,23 +245,20 @@ public class MafiaGame2 {
     }
 
     private String processMafiaInput(String userInput) {
-
+        boolean foundPlayer = false;
         HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
         for (int i = 0; i <= CloudMafia.userid; i++) {
             if (map.get(i) != null) {
                 if (userInput.equals(map.get(i))) {
-                    //if(CloudMafia.gameOverCondition<2) { //probably going to need mutex here if keep this in
-                     //   String playerStatus=CloudMafia.dbHelper.getPlayerState(CloudMafia.code,i);
-                     //   if(playerStatus.equals("LIVING"))
-                     //       CloudMafia.dbHelper.assignStateToPlayer(CloudMafia.code, i,"MARKED");
-                    //}
-                    //else {
-                        CloudMafia.mafiaChat(id, i);
-                    //}
+                    foundPlayer = true;
+                    thread.socketOutput("Sent vote");
+                    CloudMafia.mafiaChat(id, i);
                 }
             }
         }
-        return "Sent vote";
+        if (!foundPlayer)
+            return "Not a valid player name";
+        return "";
     }
 
     private String processPoliceInput(String userInput) {
