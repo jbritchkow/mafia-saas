@@ -66,7 +66,7 @@ public static boolean timeCheckgame(){
         gameOverCondition=0;
         mutex= new Semaphore(1,true);
         //mutex.release();
-        userid=1;
+        userid=0;
         livingAbilities=3;
         System.out.println(code+"");
         boolean listening=true;
@@ -109,6 +109,7 @@ public static boolean timeCheckgame(){
             System.err.println("Could not listen on port " + portNumber);
             System.exit(-1);
         }
+
     }
 
     private static ArrayList<MafiaSThread> getMafiaThreads() {
