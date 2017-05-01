@@ -192,15 +192,15 @@ public class MafiaGame2 {
         }
         System.out.println(userName + "here pre database" + CloudMafia.here);
         gameOutput += "You are a " + role + ".";
+        HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
+        for (int i = 0; i <= CloudMafia.userid; i++) {
+            if (map.get(i) != null)
+                gameOutput += " " + map.get(i) + "; ";
 
+        }
         //First step of this method complete: All data in the database. Now for second step.
         if (!role.equals("Civilian")) {
-            HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
-            for (int i = 0; i <= CloudMafia.userid; i++) {
-                if (map.get(i) != null)
-                    gameOutput += " " + map.get(i) + "; ";
 
-            }
             if (role.equals("Police")) {
                 gameOutput += " Take a guess. Who is in the mafia? Enter their username.";
             } else if (role.equals("Doctor")) {
@@ -433,6 +433,9 @@ public class MafiaGame2 {
     private String processRoundN(String userInput) {
         System.out.println("in roundn "+userName);
         boolean reset =false;
+        for (int i = 0; i < CloudMafia.votes.length; i++) {
+            CloudMafia.votes[i]=0;
+        }
         while(!reset) reset=CloudMafia.dbHelper.resetPlayerStatesForNextTurn(CloudMafia.code);
         String playerstate =CloudMafia.dbHelper.getPlayerState(CloudMafia.code, id);
         if(CloudMafia.dbHelper.isMafiaOnlyRemaining(CloudMafia.code)){
@@ -459,13 +462,13 @@ public class MafiaGame2 {
             CloudMafia.resetTurnCounters();
             //acquired mutex
             if (role.equals("Police")) {
-                gameOutput = "Take a guess. Who is in the mafia?";
+                gameOutput += "Take a guess. Who is in the mafia?";
                 state=POLICELOOP;
             } else if (role.equals("Doctor")) {
-                gameOutput = "Quick, choose someone to save!";
+                gameOutput += "Quick, choose someone to save!";
                 state=DOCTORLOOP;
             } else if (role.equals("Mafia")) {
-                gameOutput = "Whose turn is it to die?";
+                gameOutput += "Whose turn is it to die?";
                 state=MAFIALOOP;
             }
             CloudMafia.here4++;
@@ -474,7 +477,7 @@ public class MafiaGame2 {
             //released mutex. Now another thread can access database.
 
             if (role.equals("Civilian")) {
-                gameOutput = "What is your favorite food?";//hardcoded for now. fix later.
+                gameOutput += "What is your favorite food?";//hardcoded for now. fix later.
                 state=CIVILIANLOOP;
             }
 System.out.println("RoundN here4 "+CloudMafia.here4+ " "+userName);
