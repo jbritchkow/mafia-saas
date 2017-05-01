@@ -114,8 +114,11 @@ public static boolean timeCheckgame(){
     private static ArrayList<MafiaSThread> getMafiaThreads() {
         ArrayList<MafiaSThread> list = new ArrayList<MafiaSThread>();
         for (MafiaSThread thread : threads) {
-            if (thread.getRole().equals("Mafia"))
-                list.add(thread);
+            if (thread.getRole().equals("Mafia") && !thread.getState().equals(DatabaseHelper.States.DEAD.toString())) {
+                String state = dbHelper.getPlayerState(code, thread.getPlayerId());
+                if (!DatabaseHelper.States.DEAD.equalsState(state))
+                    list.add(thread);
+            }
         }
         return list;
     }
@@ -182,5 +185,85 @@ public static boolean timeCheckgame(){
             }
         }
         CloudMafia.mutex.release();
+    }
+
+    private static boolean hasProcessedMafiaAttack = false;
+    private static boolean hasProcessedVotingStage = false;
+    public static boolean hasSendVotingMessages = false;
+    public static void resetTurnCounters() {
+        hasProcessedMafiaAttack = false;
+        hasProcessedVotingStage = false;
+        hasSendVotingMessages = false;
+    }
+
+    public static void processMafiaAttack() {
+        while (!mutex.tryAcquire()) { //readwritelock?
+            try {
+                Thread.sleep(50);
+                //this.wait(500);//milliseconds
+            } catch (InterruptedException interrupt) {
+                //bad
+            }
+        }
+        if (hasProcessedMafiaAttack) {
+            mutex.release();
+            return;
+        } else  {
+            hasProcessedMafiaAttack = true;
+            mutex.release();
+
+            //process mafia attack
+            HashMap<Integer, String> savedPlayers = dbHelper.getPlayersWithState(code, DatabaseHelper.States.HEALED.toString());
+            HashMap<Integer, String> markedPlayers = dbHelper.getPlayersWithState(code, DatabaseHelper.States.MARKED.toString());
+            String message = "";
+
+            if (markedPlayers.size() == 0 && savedPlayers.size() > 0) {
+                message = "The mafia tried to get " + savedPlayers.values().toArray()[0] + ", but he was saved by the doctor.";
+            } else if (markedPlayers.size() > 0) {
+                message = "The mafia got " + markedPlayers.values().toArray()[0];
+            } else {
+                message = "Something weird happened";
+            }
+
+            for (MafiaSThread thread : threads) {
+                new AsyncMessage(thread, message).start();
+            }
+            dbHelper.resetPlayerStatesForNextTurn(code);
+        }
+    }
+
+    public static void processVotingState(int playerId) {
+        while (!mutex.tryAcquire()) { //readwritelock?
+            try {
+                Thread.sleep(50);
+                //this.wait(500);//milliseconds
+            } catch (InterruptedException interrupt) {
+                //bad
+            }
+        }
+        if (hasProcessedVotingStage) {
+            mutex.release();
+            return;
+        } else  {
+            hasProcessedVotingStage = true;
+            mutex.release();
+
+            HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
+            String gameOutput = "";
+
+            gameOutput = "You voted that " + map.get(playerId) + " was in the mafia!";
+            CloudMafia.dbHelper.assignStateToPlayer(CloudMafia.code, playerId, "DEAD");
+            if(CloudMafia.dbHelper.getPlayerRole(CloudMafia.code, playerId).equals("Mafia")){
+                CloudMafia.gameOverCondition++;
+                gameOutput+=" And you were right!";
+            }
+            else gameOutput+=" Unfortunately, they were not.";
+
+            for (MafiaSThread thread : threads) {
+                new AsyncMessage(thread, gameOutput).start();
+            }
+
+            CloudMafia.hasSendVotingMessages = true;
+        }
     }
 }

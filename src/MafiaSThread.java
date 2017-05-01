@@ -32,6 +32,9 @@ public class MafiaSThread extends Thread {
     public String getRole() {
         return mg.getRole();
     }
+    public int getPlayerId() {
+        return mg.getPlayerId();
+    }
     public void endVoting() {
         mg.endVoting();
         socketOutput("Voting is finished. Press enter to continue.");

@@ -32,6 +32,9 @@ public class MafiaGame2 {
     public String getRole() {
         return role;
     }
+    public int getPlayerId() {
+        return id;
+    }
 
     //private int code =0;
     public String processGame(String userInput) {
@@ -407,6 +410,8 @@ public class MafiaGame2 {
 
     private String processStepOne(String userInput) {
         String gameOutput = "";
+        CloudMafia.processMafiaAttack();
+
         while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
             try {
                 Thread.sleep(500);//milliseconds
@@ -479,13 +484,23 @@ public class MafiaGame2 {
                 mafia = i;
             }
         }
-        gameOutput = "You voted that " + map.get(mafia) + " was in the mafia!";
+        CloudMafia.processVotingState(mafia);
+        /*gameOutput = "You voted that " + map.get(mafia) + " was in the mafia!";
         CloudMafia.dbHelper.assignStateToPlayer(CloudMafia.code, mafia, "DEAD");
         if(CloudMafia.dbHelper.getPlayerRole(CloudMafia.code, mafia).equals("Mafia")){
             CloudMafia.gameOverCondition++;
             gameOutput+=" And you were right!";
         }
-        else gameOutput+=" Unfortunately, they were not.";
+        else gameOutput+=" Unfortunately, they were not.";*/
+        while (!CloudMafia.hasSendVotingMessages) {
+            try {
+                Thread.sleep(50);
+                //this.wait(500);//milliseconds
+            } catch (InterruptedException interrupt) {
+                gameOutput = ("Sorry, interrupt");
+            }
+        }
+
         // TODO: Display results; show if sucessful or not
         //TODO: If all mafia dead, gameOutput=Game Over
         //TODO: else, set state back to roundn and restart
@@ -522,6 +537,7 @@ public class MafiaGame2 {
                 }
 
             }
+            CloudMafia.resetTurnCounters();
             //acquired mutex
             if (role.equals("Police")) {
                 gameOutput = "Take a guess. Who is in the mafia?";
