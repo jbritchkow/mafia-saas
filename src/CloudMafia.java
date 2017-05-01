@@ -197,6 +197,7 @@ public static boolean timeCheckgame(){
         hasProcessedMafiaAttack = false;
         hasProcessedVotingStage = false;
         hasSendVotingMessages = false;
+        here3 = 0;
     }
 
     public static void processMafiaAttack() {
