@@ -504,6 +504,9 @@ public class MafiaGame2 {
         boolean reset =false;
         while(!reset) reset=CloudMafia.dbHelper.resetPlayerStatesForNextTurn(CloudMafia.code);
         String playerstate =CloudMafia.dbHelper.getPlayerState(CloudMafia.code, id);
+        if(CloudMafia.dbHelper.isMafiaOnlyRemaining(CloudMafia.code)){
+            return "Game Over, mafia wins";
+        }
         if(playerstate.equals("LIVING")&&CloudMafia.gameOverCondition<2) {
             //From here, same as earlier step.
             String gameOutput = "";
@@ -518,9 +521,7 @@ public class MafiaGame2 {
             for (int i = 0; i <= CloudMafia.userid; i++) {
                 if (map.get(i) != null) {
                     gameOutput += " " + map.get(i) + "; ";
-                    if(CloudMafia.dbHelper.isMafiaOnlyRemaining(i)){
-                        return "Game Over, mafia wins";
-                    }
+
                 }
 
             }
