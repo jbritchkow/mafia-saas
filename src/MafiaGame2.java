@@ -181,7 +181,7 @@ public class MafiaGame2 {
         }
         CloudMafia.here++;
         CloudMafia.mutex.release();
-
+        CloudMafia.here3=0;
         while (CloudMafia.here != CloudMafia.threadcount) {
             try {
                 Thread.sleep(100);
@@ -336,7 +336,8 @@ public class MafiaGame2 {
 
         CloudMafia.here2++;
         CloudMafia.mutex.release();
-        System.out.println("who is pre here: " + CloudMafia.here + " " + userName);
+        CloudMafia.here4=0;
+        System.out.println("who is pre here2: " + CloudMafia.here + " " + userName);
         gameOutput = ("So. Who is in the mafia?");
         while (CloudMafia.here2 != CloudMafia.threadcount) {
             try {
@@ -378,13 +379,13 @@ public class MafiaGame2 {
             //TODO: sum votes across threads
         }
 
-        CloudMafia.here--;
+        CloudMafia.here3++;
         CloudMafia.mutex.release();
-
+        CloudMafia.here=0;
 
         //Wait until all threads have finished this step to display results!!!
-        System.out.println("looks like here: " + CloudMafia.here + " " + userName);
-        while (CloudMafia.here != 0) {
+        System.out.println("looks like here3: " + CloudMafia.here3 + " " + userName);
+        while (CloudMafia.here3 != CloudMafia.threadcount) {
             try {
                 Thread.sleep(500);
                 //this.wait(500);//milliseconds
@@ -467,16 +468,17 @@ public class MafiaGame2 {
                 gameOutput = "Whose turn is it to die?";
                 state=MAFIALOOP;
             }
-            CloudMafia.here2--;
+            CloudMafia.here4++;
             CloudMafia.mutex.release();
+            CloudMafia.here2=0;
             //released mutex. Now another thread can access database.
 
             if (role.equals("Civilian")) {
                 gameOutput = "What is your favorite food?";//hardcoded for now. fix later.
                 state=CIVILIANLOOP;
             }
-System.out.println("RoundN here2 "+CloudMafia.here2+ " "+userName);
-            while (CloudMafia.here2 != 0) {
+System.out.println("RoundN here4 "+CloudMafia.here4+ " "+userName);
+            while (CloudMafia.here4 != CloudMafia.threadcount) {
                 try {
                     Thread.sleep(500);
                     //this.wait(500);//milliseconds

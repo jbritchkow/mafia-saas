@@ -14,6 +14,8 @@ public static int threadcount;
 public static int gameOverCondition;
 public static int here;
 public static int here2;
+public static int here3;
+public static int here4;
 public static int [] votes;
 public static int livingAbilities;
 //public static int threadCount;
@@ -62,7 +64,7 @@ public static boolean timeCheckgame(){
         are easy to compare and easy to randomize.
         */
 
-        here=here2=0;
+        here=here2=here3=here4=0;
         gameOverCondition=0;
         mutex= new Semaphore(1,true);
         //mutex.release();
