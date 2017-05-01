@@ -438,6 +438,7 @@ public class MafiaGame2 {
         }
         while(!reset) reset=CloudMafia.dbHelper.resetPlayerStatesForNextTurn(CloudMafia.code);
         String playerstate =CloudMafia.dbHelper.getPlayerState(CloudMafia.code, id);
+        CloudMafia.hasSendVotingMessages=false;
         if(CloudMafia.dbHelper.isMafiaOnlyRemaining(CloudMafia.code)){
             return "Game Over, mafia wins";
         }
