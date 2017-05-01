@@ -516,8 +516,12 @@ public class MafiaGame2 {
             }
             HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
             for (int i = 0; i <= CloudMafia.userid; i++) {
-                if (map.get(i) != null)
+                if (map.get(i) != null) {
                     gameOutput += " " + map.get(i) + "; ";
+                    if(CloudMafia.dbHelper.isMafiaOnlyRemaining(i)){
+                        return "Game Over, mafia wins";
+                    }
+                }
 
             }
             //acquired mutex
