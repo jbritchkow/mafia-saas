@@ -1,5 +1,7 @@
 import java.net.*;
 import java.io.*;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
 
 public class MafiaSThread extends Thread {
@@ -53,8 +55,10 @@ public class MafiaSThread extends Thread {
             out.println(outputLine);
 
             while ((inputLine = in.readLine()) != null) {
-                socketOutput("Processing input, please wait");
+                Timer timer = new Timer();
+                timer.schedule(new DelayedMessageTask("Processing input, please wait"), 1000);
                 outputLine = mg.processGame(inputLine);
+                timer.cancel();
                 socketOutput(outputLine);
                 if (outputLine.equals("Game over"))
                     break;
@@ -64,6 +68,16 @@ public class MafiaSThread extends Thread {
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public class DelayedMessageTask extends TimerTask {
+        private String message;
+        public DelayedMessageTask(String message) {
+            this.message = message;
+        }
+        public void run() {
+            socketOutput(message);
         }
     }
 }
