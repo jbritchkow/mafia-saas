@@ -82,26 +82,30 @@ public class MafiaGame2 {
     }
 
     private String processAskedCode(String userInput) {
-        //TODO: SANITIZE INPUT
-        int loccode = Integer.parseInt(userInput);//error forced me to do this
-        if (loccode == CloudMafia.code) {
-            while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
-                try {
+        try {
+            int loccode = Integer.parseInt(userInput);//error forced me to do this
+            if (loccode == CloudMafia.code) {
+                while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
                     Thread.sleep(500);//milliseconds
-                } catch (InterruptedException interrupt) {
-                    return "Sorry, interrupt";
                 }
-            }
-            //acquired mutex
-            CloudMafia.threadcount++;
+                //acquired mutex
+                CloudMafia.threadcount++;
 
-            CloudMafia.mutex.release();
-            System.out.println(CloudMafia.threadcount + "");
-            state = GOTCODE;
-            return "You have entered game " + CloudMafia.code + "! Hit enter to get started!";
-        } else {
+                CloudMafia.mutex.release();
+                System.out.println(CloudMafia.threadcount + "");
+                state = GOTCODE;
+                return "You have entered game " + CloudMafia.code + "! Hit enter to get started!";
+            } else {
+                state = ASKEDCODE;
+                return "That is not a valid game. Please reenter your game code.";
+            }
+        }
+        catch (NumberFormatException e){
             state = ASKEDCODE;
             return "That is not a valid game. Please reenter your game code.";
+        }
+        catch (InterruptedException e){
+            return "Sorry, interrupt";
         }
     }
 
@@ -112,7 +116,7 @@ public class MafiaGame2 {
 
     private String processAskedName(String userInput) {
         if (!userInput.equals("")) {
-            //TODO: SANITIZE INPUT
+            //TODO: SANITIZE INPUT (what does this mean? cant the user put in whatever name they want?)
             if (id == 0)
                 id = CloudMafia.userid++;
             boolean database = CloudMafia.dbHelper.checkNameAndAddPlayerToGame(CloudMafia.code, id, userInput);
@@ -363,7 +367,7 @@ public class MafiaGame2 {
             }
         }
         HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
-        if (userInput != "") {
+        if (!userInput.equals("")) {
             //TODO: sanitize input
             System.out.println(CloudMafia.userid);
             for (int i = 0; i < CloudMafia.userid; i++) {
