@@ -382,8 +382,15 @@ public class MafiaGame2 {
             CloudMafia.mutex.release();
             return "Game over";
         }
-        else
-            gameOutput = ("So. Who is in the mafia?");
+        else {
+            HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
+            for (int i = 0; i <= CloudMafia.userid; i++) {
+                if (map.get(i) != null)
+                    gameOutput += " " + map.get(i) + "; ";
+
+            }
+            gameOutput += "So. Who is in the mafia?";
+        }
 
         System.out.println("who is post here2: " + CloudMafia.here + " " + userName);
         state = VOTED;
