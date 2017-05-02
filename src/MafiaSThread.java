@@ -5,13 +5,13 @@ import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
 
 public class MafiaSThread extends Thread {
-    private Socket socket = null;
+    private Socket mafiaConnectionSocket = null;
     private final Semaphore sendOutput = new Semaphore(1, true);
     private PrintWriter out = null;
     private MafiaGame2 mg;
-    public MafiaSThread(Socket socket) {
+    public MafiaSThread(Socket incomingSocket) {
         super("MafiaSThread");
-        this.socket = socket;
+        this.mafiaConnectionSocket = incomingSocket;
     }
 
     public void socketOutput(String message) {
@@ -22,7 +22,11 @@ public class MafiaSThread extends Thread {
             return;
         }
         if (out == null) {
-            System.out.println("Socket not setup");
+            System.out.println("PrintWriter messed up. Attempting to fix.");
+            try {
+                out = new PrintWriter(mafiaConnectionSocket.getOutputStream(), true);
+            } catch (Exception e) { System.out.println("Could not recreate PrintWriter for " + mg.getPlayerId()); }
+            sendOutput.release();
             return;
         }
         out.println(message);
@@ -49,9 +53,9 @@ public class MafiaSThread extends Thread {
         try (
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(
-                                socket.getInputStream()));
+                                mafiaConnectionSocket.getInputStream()));
         ) {
-            out = new PrintWriter(socket.getOutputStream(), true);
+            out = new PrintWriter(mafiaConnectionSocket.getOutputStream(), true);
             String inputLine, outputLine;
             mg = new MafiaGame2(this);//service class
             outputLine = mg.processGame(null);
@@ -69,7 +73,7 @@ public class MafiaSThread extends Thread {
             }
             out.close();
             out = null;
-            socket.close();
+            mafiaConnectionSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

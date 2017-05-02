@@ -335,6 +335,7 @@ public class MafiaGame2 {
                 System.out.println ("Sorry, interrupt");
             }
         }*/
+        System.out.println(userName + " is moving to stepone");
         state = STEPONE;
     }
     public void endMafiaVoting() {
