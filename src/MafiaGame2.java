@@ -423,6 +423,7 @@ public class MafiaGame2 {
             }
         }
         System.out.println("after send voting msgs "+userName);
+        CloudMafia.here3=0;
         // TODO: Display results; show if sucessful or not
         //TODO: If all mafia dead, gameOutput=Game Over
         //TODO: else, set state back to roundn and restart
