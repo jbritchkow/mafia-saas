@@ -347,7 +347,7 @@ public class MafiaGame2 {
 
         while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
             try {
-                Thread.sleep(500);//milliseconds
+                Thread.sleep(50);//milliseconds
             } catch (InterruptedException interrupt) {
                 gameOutput = ("Sorry, interrupt");
             }
@@ -357,15 +357,32 @@ public class MafiaGame2 {
         CloudMafia.mutex.release();
         CloudMafia.here4=0;
         System.out.println("who is pre here2: " + CloudMafia.here + " " + userName);
-        gameOutput = ("So. Who is in the mafia?");
         while (CloudMafia.here2 != CloudMafia.threadcount) {
             try {
-                Thread.sleep(500);
+                Thread.sleep(50);
                 //this.wait(500);//milliseconds
             } catch (InterruptedException interrupt) {
                 gameOutput = ("Sorry, interrupt");
             }
         }
+        String playerState = CloudMafia.dbHelper.getPlayerState(CloudMafia.code, id);
+        if (DatabaseHelper.States.DEAD.equalsState(playerState)) {
+            while (!CloudMafia.mutex.tryAcquire()) {
+                try {
+                    Thread.sleep(500);//milliseconds
+                } catch (InterruptedException interrupt) {
+                    System.out.println ("Sorry, interrupt");
+                }
+            }
+            CloudMafia.threadcount--;
+            if(role.equals("Doctor")||role.equals("Police")){
+                CloudMafia.livingAbilities--;
+            }
+            CloudMafia.mutex.release();
+            return "Game over";
+        }
+        else
+            gameOutput = ("So. Who is in the mafia?");
 
         System.out.println("who is post here2: " + CloudMafia.here + " " + userName);
         state = VOTED;
