@@ -388,8 +388,8 @@ public class MafiaGame2 {
         CloudMafia.here=0;
 
         //Wait until all threads have finished this step to display results!!!
-        System.out.println("looks like here3: " + CloudMafia.here3 + " " + userName);
-        while (CloudMafia.here3 != CloudMafia.threadcount) {
+        System.out.println("looks like here2: " + CloudMafia.here3 + " " + userName);
+        while (CloudMafia.here2 != CloudMafia.threadcount) {
             try {
                 Thread.sleep(500);
                 //this.wait(500);//milliseconds
@@ -423,7 +423,7 @@ public class MafiaGame2 {
             }
         }
         System.out.println("after send voting msgs "+userName);
-        CloudMafia.here3=0;
+
         // TODO: Display results; show if sucessful or not
         //TODO: If all mafia dead, gameOutput=Game Over
         //TODO: else, set state back to roundn and restart
@@ -480,6 +480,7 @@ public class MafiaGame2 {
             CloudMafia.here4++;
             CloudMafia.mutex.release();
             CloudMafia.here2=0;
+
             //released mutex. Now another thread can access database.
 
             if (role.equals("Civilian")) {
@@ -499,6 +500,7 @@ System.out.println("RoundN here4 "+CloudMafia.here4+ " "+userName);
             //  CloudMafia.multithread.release();
             //}
             //state = GOTNAME;
+            CloudMafia.here3=0;
             return gameOutput;
         }
         else{
