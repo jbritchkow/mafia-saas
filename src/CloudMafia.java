@@ -52,11 +52,11 @@ public static boolean timeCheckgame(){
     return true;
 }
     public static void main(String args[]){
-    code =15323;
+    code =77777;
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
         } catch(Exception e) { return; }
-        dbHelper = new DatabaseHelper("jdbc:mysql://mafia.curimo31kkeg.us-west-2.rds.amazonaws.com:3306/mafia?user=aslee1&password=secretpassword987");
+        dbHelper = new DatabaseHelper("jdbc:mysql://mafia.curimo31kkeg.us-west-2.rds.amazonaws.com:3306/mafia?user=jbritchkow&password=secretpassword987");
         dbHelper.deleteGame(code);
         /*
         hardcoded the code for now. I don't think we should need to worry about
@@ -222,9 +222,9 @@ public static boolean timeCheckgame(){
             String message = "";
 
             if (markedPlayers.size() == 0 && savedPlayers.size() > 0) {
-                message = "The mafia tried to get " + savedPlayers.values().toArray()[0] + ", but he was saved by the doctor.";
+                message = "The mafia tried to get " + savedPlayers.values().toArray()[0] + ", but he was saved by the doctor.  Press enter to continue.";
             } else if (markedPlayers.size() > 0) {
-                message = "The mafia got " + markedPlayers.values().toArray()[0];
+                message = "The mafia got " + markedPlayers.values().toArray()[0] + ". Press enter to continue.";
             } else {
                 message = "Something weird happened";
             }
@@ -255,14 +255,14 @@ public static boolean timeCheckgame(){
             HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
             String gameOutput = "";
 
-            gameOutput = "You voted that " + map.get(playerId) + " was in the mafia!";
+            gameOutput = "The group voted that " + map.get(playerId) + " was in the mafia!";
             CloudMafia.dbHelper.assignStateToPlayer(CloudMafia.code, playerId, "DEAD");
             if(CloudMafia.dbHelper.getPlayerRole(CloudMafia.code, playerId).equals("Mafia")){
                 CloudMafia.gameOverCondition++;
                 gameOutput+=" And you were right!";
             }
             else gameOutput+=" Unfortunately, they were not.";
-
+            gameOutput += " Press enter to continue.";
             for (MafiaSThread thread : threads) {
                 new AsyncMessage(thread, gameOutput).start();
             }

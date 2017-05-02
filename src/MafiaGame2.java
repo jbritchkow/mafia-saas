@@ -206,7 +206,7 @@ public class MafiaGame2 {
         if (!role.equals("Civilian")) {
 
             if (role.equals("Police")) {
-                gameOutput += " Take a guess. Who is in the mafia? Enter their username.";
+                gameOutput += " Take a guess. Who is in  he mafia? Enter their username.";
             } else if (role.equals("Doctor")) {
                 gameOutput += " Quick, choose someone to save! Enter their username.";
             } else if (role.equals("Mafia")) {
