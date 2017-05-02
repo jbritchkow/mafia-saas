@@ -516,7 +516,7 @@ System.out.println("RoundN here4 "+CloudMafia.here4+ " "+userName);
                 CloudMafia.livingAbilities--;
             }
             CloudMafia.mutex.release();
-            return "Game Over";
+            return "Game Over, Civilians win!";
         }
     }
 }
