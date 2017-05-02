@@ -117,6 +117,9 @@ public class MafiaGame2 {
     }
 
     private String processAskedName(String userInput) {
+        if(userInput.indexOf(';') != -1){
+            return "Names cannot include punctuation.";
+        }
         if (!userInput.equals("")) {
             //TODO: SANITIZE INPUT (what does this mean? cant the user put in whatever name they want?)
             if (id == 0)
@@ -241,6 +244,10 @@ public class MafiaGame2 {
     }
 
     private String processMafiaInput(String userInput) {
+        if(userInput.indexOf(';') != -1){
+            return "Names cannot include punctuation.";
+        }
+
         boolean foundPlayer = false;
         HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
         for (int i = 0; i <= CloudMafia.userid; i++) {
@@ -258,12 +265,14 @@ public class MafiaGame2 {
     }
 
     private String processPoliceInput(String userInput) {
+        if(userInput.indexOf(';') != -1){
+            return "Names cannot include punctuation.";
+        }
+
         String gameOutput = "";
         boolean foundPlayer = false;
         HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
 
-        //TODO: Compare user input to database
-        //TODO: What do if user inputs bad input ie a name that is not a name?
         for (int i = 0; i <= CloudMafia.userid; i++) {
             if (map.get(i) != null) {
                 if (userInput.equals(map.get(i))) {
@@ -288,6 +297,10 @@ public class MafiaGame2 {
     }
 
     private String processDoctorInput(String userInput) {
+        if(userInput.indexOf(';') != -1){
+            return "Names cannot include punctuation.";
+        }
+
         boolean foundPlayer = false;
         HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
         for (int i = 0; i <= CloudMafia.userid; i++) {
@@ -360,30 +373,40 @@ public class MafiaGame2 {
     }
 
     private String processVoted(String userInput) {
+        if(userInput.indexOf(';') != -1){
+            return "Names cannot include punctuation.";
+        }
+
+        boolean foundPlayer = false;
         String gameOutput = "";
+        HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
+
         while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
             try {
-                Thread.sleep(500);//milliseconds
+                Thread.sleep(50);//milliseconds
             } catch (InterruptedException interrupt) {
                 gameOutput = ("Sorry, interrupt");
             }
         }
-        HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
         if (!userInput.equals("")) {
-            //TODO: sanitize input
             System.out.println(CloudMafia.userid);
             for (int i = 0; i < CloudMafia.userid; i++) {
                 System.out.println(""+i+ " has "+CloudMafia.votes[i]);
-                if (map.get(i) != null)
+                if (map.get(i) != null) {
                     if (userInput.equals(map.get(i))) {
-                    System.out.println(map.get(i));
+                        foundPlayer = true;
+                        System.out.println(map.get(i));
                         CloudMafia.votes[i] += 1;
                         System.out.println("in vote loop" + CloudMafia.votes[i] + "" + i);
                     }
-
+                }
             }
-            //TODO: sum votes across threads
         }
+        if (!foundPlayer) {
+            CloudMafia.mutex.release();
+            return "That is not a name of a player. Type the name of a player";
+        }
+
 
         CloudMafia.here3++;
         CloudMafia.mutex.release();
@@ -505,6 +528,21 @@ System.out.println("RoundN here4 "+CloudMafia.here4+ " "+userName);
             CloudMafia.here3=0;
             return gameOutput;
         }
+        else if (CloudMafia.gameOverCondition == 2){
+            while (!CloudMafia.mutex.tryAcquire()) {
+                try {
+                    Thread.sleep(500);//milliseconds
+                } catch (InterruptedException interrupt) {
+                    System.out.println ("Sorry, interrupt");
+                }
+            }
+            CloudMafia.threadcount--;
+            if(role.equals("Doctor")||role.equals("Police")){
+                CloudMafia.livingAbilities--;
+            }
+            CloudMafia.mutex.release();
+            return "Game Over, civilians win!";
+        }
         else{
             while (!CloudMafia.mutex.tryAcquire()) {
                 try {
@@ -518,7 +556,7 @@ System.out.println("RoundN here4 "+CloudMafia.here4+ " "+userName);
                 CloudMafia.livingAbilities--;
             }
             CloudMafia.mutex.release();
-            return "Game Over";
+            return "Game over";
         }
     }
 }
