@@ -78,6 +78,18 @@ public class MafiaGame2 {
 
     private String processGameStart(String userInput) {
         state = ASKEDCODE;
+        while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
+            try {
+                Thread.sleep(50);//milliseconds
+            }
+            catch (InterruptedException e) {
+                return "Sorry, interrupt";
+            }
+        }
+        //acquired mutex
+        CloudMafia.threadcount++;
+
+        CloudMafia.mutex.release();
         return "Welcome to SaaS Mafia! Please enter your game code.";
     }
 
@@ -85,13 +97,6 @@ public class MafiaGame2 {
         try {
             int loccode = Integer.parseInt(userInput);//error forced me to do this
             if (loccode == CloudMafia.code) {
-                while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
-                    Thread.sleep(500);//milliseconds
-                }
-                //acquired mutex
-                CloudMafia.threadcount++;
-
-                CloudMafia.mutex.release();
                 System.out.println(CloudMafia.threadcount + "");
                 state = GOTCODE;
                 return "You have entered game " + CloudMafia.code + "! Hit enter to get started!";
@@ -103,9 +108,6 @@ public class MafiaGame2 {
         catch (NumberFormatException e){
             state = ASKEDCODE;
             return "That is not a valid game. Please reenter your game code.";
-        }
-        catch (InterruptedException e){
-            return "Sorry, interrupt";
         }
     }
 
@@ -516,7 +518,7 @@ System.out.println("RoundN here4 "+CloudMafia.here4+ " "+userName);
                 CloudMafia.livingAbilities--;
             }
             CloudMafia.mutex.release();
-            return "Game Over, Civilians win!";
+            return "Game Over";
         }
     }
 }
