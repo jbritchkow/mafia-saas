@@ -202,14 +202,14 @@ public class MafiaGame2 {
         System.out.println(userName + "here pre database" + CloudMafia.here);
         gameOutput += "You are a " + role + ".";
         HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
-        for (int i = 0; i <= CloudMafia.userid; i++) {
-            if (map.get(i) != null)
-                gameOutput += " " + map.get(i) + "; ";
 
-        }
         //First step of this method complete: All data in the database. Now for second step.
         if (!role.equals("Civilian")) {
+            for (int i = 0; i <= CloudMafia.userid; i++) {
+                if (map.get(i) != null)
+                    gameOutput += " " + map.get(i) + "; ";
 
+            }
             if (role.equals("Police")) {
                 gameOutput += " Take a guess. Who is in  he mafia? Enter their username.";
             } else if (role.equals("Doctor")) {
