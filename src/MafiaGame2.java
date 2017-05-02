@@ -389,7 +389,7 @@ public class MafiaGame2 {
 
         //Wait until all threads have finished this step to display results!!!
         System.out.println("looks like here2: " + CloudMafia.here3 + " " + userName);
-        while (CloudMafia.here2 != CloudMafia.threadcount) {
+        while (CloudMafia.here3 != CloudMafia.threadcount) {
             try {
                 Thread.sleep(500);
                 //this.wait(500);//milliseconds
