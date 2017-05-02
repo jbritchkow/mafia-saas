@@ -191,7 +191,7 @@ public class MafiaGame2 {
         CloudMafia.here++;
         CloudMafia.mutex.release();
         CloudMafia.here3=0;
-        while (CloudMafia.here >= CloudMafia.threadcount) {
+        while (CloudMafia.here <= CloudMafia.threadcount) {
             try {
                 Thread.sleep(100);
                 //this.wait(500);//milliseconds
@@ -357,7 +357,7 @@ public class MafiaGame2 {
         CloudMafia.mutex.release();
         CloudMafia.here4=0;
         System.out.println("who is pre here2: " + CloudMafia.here + " " + userName);
-        while (CloudMafia.here2 >= CloudMafia.threadcount) {
+        while (CloudMafia.here2 <= CloudMafia.threadcount) {
             try {
                 Thread.sleep(50);
                 //this.wait(500);//milliseconds
@@ -431,7 +431,7 @@ public class MafiaGame2 {
 
         //Wait until all threads have finished this step to display results!!!
         System.out.println("looks like here2: " + CloudMafia.here3 + " " + userName);
-        while (CloudMafia.here3 >= CloudMafia.threadcount) {
+        while (CloudMafia.here3 <= CloudMafia.threadcount) {
             try {
                 Thread.sleep(500);
                 //this.wait(500);//milliseconds
@@ -530,7 +530,7 @@ public class MafiaGame2 {
                 state=CIVILIANLOOP;
             }
 System.out.println("RoundN here4 "+CloudMafia.here4+ " "+userName);
-            while (CloudMafia.here4 >= CloudMafia.threadcount) {
+            while (CloudMafia.here4 <= CloudMafia.threadcount) {
                 try {
                     Thread.sleep(500);
                     //this.wait(500);//milliseconds
