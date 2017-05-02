@@ -68,7 +68,7 @@ public class MafiaSThread extends Thread {
                 timer.cancel();
                 socketOutput(outputLine);
                 while (in.ready()) { in.skip(1);}
-                if (outputLine.equals("Game over"))
+                if (outputLine.equals("Game over") || outputLine.equals("Game Over, civilians win!") || outputLine.equals("Game Over, mafia wins"))
                     break;
             }
             out.close();
