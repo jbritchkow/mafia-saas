@@ -90,6 +90,7 @@ public class MafiaGame2 {
             int loccode = 0;
             if (userInput.equals("new")) {
                 int code = Listener.playerCreateGame(this.thread);
+                return "Your new game code is " + code + "\nPlease enter your game code.";
             } else {
                 loccode = Integer.parseInt(userInput);//error forced me to do this
             }
