@@ -105,6 +105,9 @@ public boolean timeCheckgame(String thing){
 
     public void addThread(MafiaSThread thread) {
         threads.add(thread);
+        for (MafiaSThread t : threads) {
+            new AsyncMessage(t, "There are now " + threads.size() + " players in the game.").start();
+        }
     }
 
     private ArrayList<MafiaSThread> getMafiaThreads() {
