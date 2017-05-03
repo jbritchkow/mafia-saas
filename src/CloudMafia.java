@@ -78,6 +78,7 @@ public static boolean timeCheckgame(){
         //long checkTime;
         int portNumber = 4444;//Random port, can customize later. prev: Integer.parseInt(args[0]);
         threads = new ArrayList<MafiaSThread>();
+
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
             while (listening) {
                 MafiaSThread thread = new MafiaSThread(serverSocket.accept());
