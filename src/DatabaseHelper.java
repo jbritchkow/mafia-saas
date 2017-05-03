@@ -412,7 +412,7 @@ public class DatabaseHelper {
         }
         return result;
     }
-    public boolean deleteGame(int gameId) {
+    public boolean resetGame(int gameId) {
         Statement stmt = null;
         boolean success = true;
         Connection conn = null;
@@ -420,6 +420,12 @@ public class DatabaseHelper {
             conn = connect();
             stmt = conn.createStatement();
             stmt.execute("delete from Players where GameId='" + gameId + "'");
+            //stmt.close();
+            //stmt = conn.createStatement();
+            stmt.execute("delete from Games where Id='" + gameId + "'");
+            //stmt.close();
+            //stmt = conn.createStatement();
+            stmt.execute("insert into Games (Id, Status) values (" + gameId + ", 'Active')");
         }
         catch (SQLException ex) {
             success = false;
@@ -435,6 +441,40 @@ public class DatabaseHelper {
             disconnect(conn);
         }
         return success;
+    }
+
+    public boolean isActiveGame(int gameId) {
+        boolean result = false;
+        Statement stmt = null;
+        ResultSet rs = null;
+        Connection conn = null;
+        try {
+            conn = connect();
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("select * from Games where Id='" +
+                    gameId + "' and Status='Active'");
+
+            while (rs.next()) {
+                result = true;
+            }
+        }
+        catch (SQLException ex) {
+            System.out.println("SQLException: " + ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+        }
+        finally {
+            if (rs != null)
+                try {
+                    rs.close();
+                } catch (SQLException e) {}
+            if (stmt != null)
+                try {
+                    stmt.close();
+                } catch (SQLException e) {}
+            disconnect(conn);
+        }
+        return result;
     }
 
 }

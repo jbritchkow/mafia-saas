@@ -5,29 +5,29 @@ import java.util.HashMap;
 import java.util.concurrent.Semaphore;
 
 public class CloudMafia {
-public static int code;
-public static Semaphore mutex;
-public static Semaphore multithread;
-public static int userid;
-public static DatabaseHelper dbHelper;
-public static int threadcount;
-public static int gameOverCondition;
-public static int here;
-public static int here2;
-public static int here3;
-public static int here4;
-public static int [] votes;
-public static int livingAbilities;
-public static String checkthis;
+public int code;
+public Semaphore mutex;
+public Semaphore multithread;
+public int userid;
+public DatabaseHelper dbHelper;
+public int threadcount;
+public int gameOverCondition;
+public int here;
+public int here2;
+public int here3;
+public int here4;
+public int [] votes;
+public int livingAbilities;
+public String checkthis;
 //public static int threadCount;
-private static final Object lock = new Object();//not a real lock
-private static long checkTime;
-public static boolean start = false;
+private final Object lock = new Object();//not a real lock
+private long checkTime;
+public boolean start = false;
 //private static long startTime;
 //private static long finishTime;
-    private static ArrayList<MafiaSThread> threads;
+    private ArrayList<MafiaSThread> threads;
 
-public static boolean timeCheck(){
+public boolean timeCheck(){
 
     synchronized(lock){
         try {
@@ -49,24 +49,35 @@ public static boolean timeCheck(){
     }
     return true;
 }
-public static boolean timeCheckgame(String thing){
+public boolean timeCheckgame(String thing){
     System.out.println("timecheck =" +timeCheck());
     System.out.println("thing: "+thing);
     if(checkthis.equals(thing)){
+        while (!mutex.tryAcquire()) { //readwritelock?
+            try {
+                Thread.sleep(50);//milliseconds
+            } catch (InterruptedException interrupt) {
+            }
+        }
+        if (!start) {
+            startGame();
+            start = true;
+        }
         start=true;
+        mutex.release();
         return false;
     }
     return true;
 }
-    public static void main(String args[]){
+    public CloudMafia(int gameCode){
     checkthis = "startgame";
     //checkthis="0";
-    code =77777;
+    code =gameCode;
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
         } catch(Exception e) { return; }
         dbHelper = new DatabaseHelper("jdbc:mysql://mafia.curimo31kkeg.us-west-2.rds.amazonaws.com:3306/mafia?user=jbritchkow&password=secretpassword987");
-        dbHelper.deleteGame(code);
+        //dbHelper.resetGame(code);
         /*
         hardcoded the code for now. I don't think we should need to worry about
         randomizing it too much? In any case, used an int because ints
@@ -80,51 +91,23 @@ public static boolean timeCheckgame(String thing){
         userid=0;
         livingAbilities=3;
         System.out.println(code+"");
-        boolean listening=true;
-        long startTime = System.currentTimeMillis();
-        // Run some code;
-        long finishTime =0;
-        //long checkTime;
-        int portNumber = 4444;//Random port, can customize later. prev: Integer.parseInt(args[0]);
         threads = new ArrayList<MafiaSThread>();
-
-        try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
-            while (listening) {
-                MafiaSThread thread = new MafiaSThread(serverSocket.accept());
-                thread.start();
-                threads.add(thread);
-                finishTime=System.currentTimeMillis();
-                checkTime=finishTime-startTime;
-                listening=timeCheck();
-                System.out.println(listening);
-
-                for (MafiaSThread t : threads) {
-                    new AsyncMessage(t, "There are now " + threads.size() + " players in the game.").start();
-                }
-            }
-            votes=new int [userid+threadcount+1];
-            for(int i=0;i<votes.length;i++){
-                votes[i]=0;
-            }
-            multithread=new Semaphore(threadcount,true);
-            multithread.release(threadcount);
-            //while(true){
-           //     if(here==threadcount){
-            ///        System.out.println("It'll work");
-           //     }
-           // }
-            //if(here==threadcount){
-              //  multithread.release(threadcount);
-            //}
-            //Could check per thread, if state equals, then wait...?
-        } catch (IOException e) {
-            System.err.println("Could not listen on port " + portNumber);
-            System.exit(-1);
-        }
-
     }
 
-    private static ArrayList<MafiaSThread> getMafiaThreads() {
+    private void startGame() {
+        votes=new int [userid+threadcount+1];
+        for(int i=0;i<votes.length;i++){
+            votes[i]=0;
+        }
+        multithread=new Semaphore(threadcount,true);
+        multithread.release(threadcount);
+    }
+
+    public void addThread(MafiaSThread thread) {
+        threads.add(thread);
+    }
+
+    private ArrayList<MafiaSThread> getMafiaThreads() {
         ArrayList<MafiaSThread> list = new ArrayList<MafiaSThread>();
         for (MafiaSThread thread : threads) {
             if (thread.getRole().equals("Mafia") && !thread.getState().equals(DatabaseHelper.States.DEAD.toString())) {
@@ -136,8 +119,8 @@ public static boolean timeCheckgame(String thing){
         return list;
     }
 
-    private static HashMap<Integer, Integer> mafiaChoices = null;
-    public static void mafiaChat(int mafiaId, int targetId) {
+    private HashMap<Integer, Integer> mafiaChoices = null;
+    public void mafiaChat(int mafiaId, int targetId) {
         if (mafiaChoices == null)
             mafiaChoices = new HashMap<Integer, Integer>();
 
@@ -180,9 +163,9 @@ public static boolean timeCheckgame(String thing){
         }
     }
 
-    private static int abilitiesCounter = 0;
-    public static void finishAbilitiesStage() {
-        while (!CloudMafia.mutex.tryAcquire()) { //readwritelock?
+    private int abilitiesCounter = 0;
+    public void finishAbilitiesStage() {
+        while (!this.mutex.tryAcquire()) { //readwritelock?
             try {
                 Thread.sleep(500);
                 //this.wait(500);//milliseconds
@@ -197,20 +180,20 @@ public static boolean timeCheckgame(String thing){
                 thread.endVoting();
             }
         }
-        CloudMafia.mutex.release();
+        this.mutex.release();
     }
 
-    private static boolean hasProcessedMafiaAttack = false;
-    private static boolean hasProcessedVotingStage = false;
-    public static boolean hasSendVotingMessages = false;
-    public static void resetTurnCounters() {
+    private boolean hasProcessedMafiaAttack = false;
+    private boolean hasProcessedVotingStage = false;
+    public boolean hasSendVotingMessages = false;
+    public void resetTurnCounters() {
         hasProcessedMafiaAttack = false;
         hasProcessedVotingStage = false;
         hasSendVotingMessages = false;
         here3 = 0;
     }
 
-    public static void processMafiaAttack() {
+    public void processMafiaAttack() {
         while (!mutex.tryAcquire()) { //readwritelock?
             try {
                 Thread.sleep(50);
@@ -246,7 +229,7 @@ public static boolean timeCheckgame(String thing){
         }
     }
 
-    public static void processVotingState(int playerId) {
+    public void processVotingState(int playerId) {
         while (!mutex.tryAcquire()) { //readwritelock?
             try {
                 Thread.sleep(50);
@@ -262,13 +245,13 @@ public static boolean timeCheckgame(String thing){
             hasProcessedVotingStage = true;
             mutex.release();
 
-            HashMap<Integer, String> map = CloudMafia.dbHelper.getLivingPlayers(CloudMafia.code);
+            HashMap<Integer, String> map = this.dbHelper.getLivingPlayers(this.code);
             String gameOutput = "";
 
             gameOutput = "The group voted that " + map.get(playerId) + " was in the mafia!";
-            CloudMafia.dbHelper.assignStateToPlayer(CloudMafia.code, playerId, "DEAD");
-            if(CloudMafia.dbHelper.getPlayerRole(CloudMafia.code, playerId).equals("Mafia")){
-                CloudMafia.gameOverCondition++;
+            this.dbHelper.assignStateToPlayer(this.code, playerId, "DEAD");
+            if(this.dbHelper.getPlayerRole(this.code, playerId).equals("Mafia")){
+                this.gameOverCondition++;
                 gameOutput+=" And you were right!";
             }
             else gameOutput+=" Unfortunately, they were not.";
@@ -277,7 +260,7 @@ public static boolean timeCheckgame(String thing){
                 new AsyncMessage(thread, gameOutput).start();
             }
 
-            CloudMafia.hasSendVotingMessages = true;
+            this.hasSendVotingMessages = true;
         }
     }
 }
