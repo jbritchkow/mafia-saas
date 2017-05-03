@@ -1,4 +1,6 @@
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,18 +80,27 @@ public static boolean timeCheckgame(){
         //long checkTime;
         int portNumber = 4444;//Random port, can customize later. prev: Integer.parseInt(args[0]);
         threads = new ArrayList<MafiaSThread>();
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
             while (listening) {
                 MafiaSThread thread = new MafiaSThread(serverSocket.accept());
                 thread.start();
                 threads.add(thread);
-                finishTime=System.currentTimeMillis();
-                checkTime=finishTime-startTime;
-                listening=timeCheck();
-                System.out.println(listening);
+                //finishTime=System.currentTimeMillis();
+                //checkTime=finishTime-startTime;
+                //listening=timeCheck();
+                //System.out.println(listening);
 
                 for (MafiaSThread t : threads) {
                     new AsyncMessage(t, "There are now " + threads.size() + " players in the game.").start();
+                }
+
+                if(in.ready()){
+                    String start = in.readLine();
+                    if(start.equals("start")){
+                        break;
+                    }
                 }
             }
             votes=new int [userid+threadcount+1];
