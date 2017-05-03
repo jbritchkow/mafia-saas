@@ -141,6 +141,12 @@ public class MafiaGame2 {
         System.out.println("in waiting");
 
         if (CloudMafia.timeCheck()) {
+            System.out.println("timecheck "+CloudMafia.timeCheck());
+            if(userInput!=""){
+                System.out.println("User input: "+userInput);
+                CloudMafia.timeCheckgame(userInput);
+                System.out.println("time check game: "+CloudMafia.timeCheckgame(userInput));
+            }
             //checks to see if time has passed. spins.
             state = WAITING;
             return "Waiting... Hit enter after a few seconds to try again.";

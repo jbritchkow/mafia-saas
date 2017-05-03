@@ -79,7 +79,7 @@ public class MafiaGame {
         else if(state==WAITING) {
             System.out.println("in waiting");
 
-            if (CloudMafia.timeCheckgame()) {
+            if (CloudMafia.timeCheckgame("")) {
                 //checks to see if time has passed. spins.
                 gameOutput="Waiting... Press enter after a few seconds to try again.";
                 state=WAITING;

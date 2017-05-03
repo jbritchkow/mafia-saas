@@ -18,9 +18,11 @@ public static int here3;
 public static int here4;
 public static int [] votes;
 public static int livingAbilities;
+public static String checkthis;
 //public static int threadCount;
 private static final Object lock = new Object();//not a real lock
 private static long checkTime;
+public static boolean start = false;
 //private static long startTime;
 //private static long finishTime;
     private static ArrayList<MafiaSThread> threads;
@@ -32,10 +34,13 @@ public static boolean timeCheck(){
             //finishTime=System.currentTimeMillis();
             //long checkTime=finishTime-startTime;
             System.out.println(checkTime);
-            if(checkTime>30000) {
+           //if(checkTime>30000) {
+            if(start) {
+
                 lock.wait(500);
                 lock.notify();
                 return false;
+                //}
             }
         }
         catch(InterruptedException e){
@@ -44,14 +49,18 @@ public static boolean timeCheck(){
     }
     return true;
 }
-public static boolean timeCheckgame(){
+public static boolean timeCheckgame(String thing){
     System.out.println("timecheck =" +timeCheck());
-    if(multithread!=null){
-        return timeCheck();
+    System.out.println("thing: "+thing);
+    if(checkthis.equals(thing)){
+        start=true;
+        return false;
     }
     return true;
 }
     public static void main(String args[]){
+    checkthis = "startgame";
+    //checkthis="0";
     code =77777;
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
